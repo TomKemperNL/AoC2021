@@ -1,4 +1,8 @@
+#dotnet
 bin
 obj
+# vim on windows?
 *~
+#vscode
 .ionide
+.fake
