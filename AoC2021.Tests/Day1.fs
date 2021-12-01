@@ -3,12 +3,7 @@ module AoC2021.Tests
 open NUnit.Framework
 open AoC2021.Day1
 
-[<SetUp>]
-let Setup () = ()
-
-[<Test>]
-let Day1APractice () =
-    let input =
+let practiceInput =
         """199
 200
 208
@@ -20,17 +15,28 @@ let Day1APractice () =
 260
 263"""
 
-    let split = input.Split("\n") |> Array.toList
-    let ints = List.map int split
+let practiceInts = practiceInput.Split("\n") |> Array.toList |> List.map int
 
-    Assert.AreEqual(7, day1a ints)
+[<SetUp>]
+let Setup () = ()
+
+[<Test>]
+let Day1APractice () =
+    Assert.AreEqual(7, day1a practiceInts)
+
+[<Test>]
+let Day1BPractice () =
+    Assert.AreEqual(5, day1b practiceInts)
+
+let input =
+        System.IO.File.ReadAllLines "./../../../Day1A.txt"
+
+let ints =  input |> Array.toList |> List.map int
 
 [<Test>]
 let Day1A () =
-    let input =
-        System.IO.File.ReadAllLines "./../../../Day1A.txt"
-
-    let split = input |> Array.toList
-    let ints = List.map int split
-
     Assert.AreEqual(1139, day1a ints)
+
+[<Test>]
+let Day1B () =
+    Assert.AreEqual(1103, day1b ints)
