@@ -7,3 +7,5 @@ obj
 .ionide
 .fake
 .config
+#visual studio
+.vs

@@ -1,4 +1,4 @@
-module AoC2021.Tests
+module AoC2021.Tests.Day1
 
 open NUnit.Framework
 open AoC2021.Day1
