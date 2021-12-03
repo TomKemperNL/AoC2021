@@ -30,10 +30,14 @@ let countCommons (input: string list) =
             | '1' -> { count with ones = count.ones + 1 }
             | '0' -> { count with zeroes = count.zeroes + 1 }
             | _ -> { count with other = count.zeroes + 1 }
-        Array.map2 update state chars
-
-                 
+        Array.map2 update state chars                 
     List.fold step start input
+
+let toLists tuples = 
+    let add (lista, listb) (a, b) = 
+        (a :: lista, b :: listb)    
+    let (las, lbs) = Seq.fold add ([], []) tuples
+    ((List.rev >> List.toArray) las, (List.rev >> List.toArray) lbs)
 
 let day3a (input: string list) =
     match input with
@@ -45,13 +49,7 @@ let day3a (input: string list) =
                    | c when c.zeroes > c.ones -> (0, 1)
                    | _ -> failwith "Ties are undefined"
                let items = Array.map split counts
-           
-               let mutable gamma = Array.create counts.Length 0
-               let mutable epsilon = Array.create counts.Length 0
-               for ix, (g, e) in Array.indexed items do
-                   gamma.[ix] <- g
-                   epsilon.[ix] <- e
-               (gamma, epsilon)  
+               toLists items
 
         let result = countCommons input
         let (gamma, epsilon) = gammaEpsilonSplit result
@@ -61,31 +59,23 @@ let day3a (input: string list) =
     | _ -> 0
     
 let day3b (input: string list) = 
-    let results = countCommons input
+    let findRating (win, lose) = 
+        let rec finder (inputs: string list) pos = 
+            let counts = countCommons inputs
+            match inputs with 
+            | [a] -> a
+            | _ -> 
+                let applicableCounts = counts.[pos]
+                let target = if applicableCounts.ones >= applicableCounts.zeroes then win else lose 
+                let isApplicable (line: string) = 
+                    line.ToCharArray().[pos] = target
+                let remaining = List.filter isApplicable inputs
+                finder remaining (pos + 1)
+        finder
 
-    let rec findOxRating (inputs: string list) pos =
-        let counts = countCommons inputs
-        match inputs with 
-        | [a] -> a
-        | _ -> 
-            let applicableCounts = counts.[pos]
-            let target = if applicableCounts.ones >= applicableCounts.zeroes then '1' else '0' 
-            let isApplicable (line: string) = 
-                line.ToCharArray().[pos] = target
-            let remaining = List.filter isApplicable inputs
-            findOxRating remaining (pos + 1)
 
-    let rec findCo2Rating (inputs: string list)  pos =
-        let counts = countCommons inputs
-        match inputs with 
-        | [a] -> a
-        | _ -> 
-            let applicableCounts = counts.[pos]
-            let target = if applicableCounts.ones >= applicableCounts.zeroes then '0' else '1' 
-            let isApplicable (line: string) = 
-                line.ToCharArray().[pos] = target
-            let remaining = List.filter isApplicable inputs
-            findCo2Rating remaining (pos + 1)
+    let findOxRating = findRating ('1', '0')
+    let findCo2Rating = findRating ('0', '1')
 
    
     let ox = findOxRating input 0 |> toIntArray |> toDecimal
