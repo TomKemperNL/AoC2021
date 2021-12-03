@@ -32,7 +32,12 @@ let Day3APractice () =
     let practiceInput = practiceInputRaw.Split(System.Environment.NewLine) |> Array.toList    
     Assert.AreEqual(198, day3a practiceInput)
 
-    
+[<Test>]
+let Day3BPractice () =
+    let practiceInput = practiceInputRaw.Split(System.Environment.NewLine) |> Array.toList    
+    Assert.AreEqual(230, day3b practiceInput)
+  
+
 [<Test>]
 let Day3A() =
 
@@ -40,3 +45,10 @@ let Day3A() =
         System.IO.File.ReadAllLines "./../../../Day3.txt" |> Array.toList
 
     Assert.AreEqual(3242606, day3a input)
+
+[<Test>]
+let Day3B() =
+    let input =
+        System.IO.File.ReadAllLines "./../../../Day3.txt" |> Array.toList
+
+    Assert.AreEqual(4856080, day3b input)
