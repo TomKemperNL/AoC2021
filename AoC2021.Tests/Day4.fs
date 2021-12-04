@@ -28,18 +28,29 @@ let CanDetermineWinner () =
 
 
 
-
 [<Test>]
 let Day4APractice() =
     let input =
         System.IO.File.ReadAllLines "./../../../Day4Practice.txt" |> Array.toList
-
     Assert.AreEqual(4512, day4a input)
 
+[<Test>]
+let Day4BPractice() =
+    let input =
+        System.IO.File.ReadAllLines "./../../../Day4Practice.txt" |> Array.toList
+    Assert.AreEqual(1924, day4b input)
 
 [<Test>]
 let Day4A() =
     let input =
         System.IO.File.ReadAllLines "./../../../Day4.txt" |> Array.toList
-
     Assert.AreEqual(69579, day4a input)
+
+[<Test>]
+let Day4B() =
+    let input =
+        System.IO.File.ReadAllLines "./../../../Day4.txt" |> Array.toList
+    Assert.AreNotEqual(0, day4b input)
+    Assert.AreNotEqual(69579, day4b input)
+
+    Assert.AreEqual(14877, day4b input)

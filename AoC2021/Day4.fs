@@ -84,5 +84,25 @@ let day4a (input: string list) =
             0
 
     (findWinner bingo.numbers)
-        
-        
+
+let day4b (input: string list) =
+    let bingo = parseInput input
+    
+    let rec findWinner numbers (boards: Board list) result = 
+        match (numbers, boards) with
+        | (h :: t), (hb::tb) -> 
+            List.iter (markNr h) boards
+
+            let winners = List.filter isWinner boards
+            let newBoards = List.except winners boards
+            let newResults = List.map (fun b -> (b, h)) winners
+
+            findWinner t newBoards (newResults @ result)
+        | (_, []) ->
+            List.head result
+        | ([], _) ->
+            List.head result
+            
+    let (b, nr) = findWinner bingo.numbers bingo.boards []
+    let score = scoreBoard b
+    nr * score
