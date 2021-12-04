@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Main.fs" />
     <Content Include="Day1A.txt" />
     <Content Include="Day2.txt" />
     <Content Include="Day3.txt" />

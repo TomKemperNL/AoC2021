@@ -2,7 +2,9 @@
 
 open NUnit.Framework
 open AoC2021.Day4
+open System.IO
 
+let inputPractice = File.ReadAllLines "./../../../Day4Practice.txt" |> Array.toList
 
 [<Test>]
 let CanDetermineWinner () = 
@@ -26,31 +28,28 @@ let CanDetermineWinner () =
     board.[2].[1] <- (3, true)
     Assert.AreEqual(true, isWinner board)
 
-
+[<Test>]
+let WutNull () = 
+    Assert.NotNull(inputPractice)
 
 [<Test>]
-let Day4APractice() =
-    let input =
-        System.IO.File.ReadAllLines "./../../../Day4Practice.txt" |> Array.toList
-    Assert.AreEqual(4512, day4a input)
+let Day4APractice() =    
+    Assert.AreEqual(4512, day4a inputPractice)
 
 [<Test>]
 let Day4BPractice() =
-    let input =
-        System.IO.File.ReadAllLines "./../../../Day4Practice.txt" |> Array.toList
-    Assert.AreEqual(1924, day4b input)
+    Assert.AreEqual(1924, day4b inputPractice)
+
+let input =
+    System.IO.File.ReadAllLines "./../../../Day4.txt" |> Array.toList
 
 [<Test>]
-let Day4A() =
-    let input =
-        System.IO.File.ReadAllLines "./../../../Day4.txt" |> Array.toList
+let Day4A() =    
     Assert.AreEqual(69579, day4a input)
 
 [<Test>]
-let Day4B() =
-    let input =
-        System.IO.File.ReadAllLines "./../../../Day4.txt" |> Array.toList
-    Assert.AreNotEqual(0, day4b input)
-    Assert.AreNotEqual(69579, day4b input)
+let Day4B() =   
+    //Assert.AreNotEqual(0, day4b input)
+    //Assert.AreNotEqual(69579, day4b input)
 
     Assert.AreEqual(14877, day4b input)
