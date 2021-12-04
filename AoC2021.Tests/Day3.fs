@@ -2,7 +2,6 @@
 
 open NUnit.Framework
 open AoC2021.Day3
-open AoC2021.Day2
 
 let practiceInputRaw = """00100
 11110

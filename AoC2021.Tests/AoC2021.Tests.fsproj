@@ -8,15 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Day3.txt" />
     <Compile Include="Day1.fs" />
     <Compile Include="Day2.fs" />
     <Compile Include="Day3.fs" />
+    <Compile Include="Day4.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Day1A.txt" />
     <Content Include="Day2.txt" />
+    <Content Include="Day3.txt" />
+    <Content Include="Day4.txt" />
+    <Content Include="Day4Practice.txt" />
   </ItemGroup>
 
   <ItemGroup>
