@@ -24,30 +24,23 @@ let TestBinary () =
     Assert.AreEqual(3, (toDecimal [|0;1;1|]))
     Assert.AreEqual(4, (toDecimal [|1;0;0|]))
 
+
+let practiceInput = practiceInputRaw.Split(System.Environment.NewLine) |> Array.toList
+
 [<Test>]
-let Day3APractice () =
-    printfn "%s" practiceInputRaw
-    
-    let practiceInput = practiceInputRaw.Split(System.Environment.NewLine) |> Array.toList    
+let Day3APractice () =    
     Assert.AreEqual(198, day3a practiceInput)
 
 [<Test>]
-let Day3BPractice () =
-    let practiceInput = practiceInputRaw.Split(System.Environment.NewLine) |> Array.toList    
+let Day3BPractice () =      
     Assert.AreEqual(230, day3b practiceInput)
-  
+
+let input = System.IO.File.ReadAllLines "./../../../Day3.txt" |> Array.toList
 
 [<Test>]
 let Day3A() =
-
-    let input =
-        System.IO.File.ReadAllLines "./../../../Day3.txt" |> Array.toList
-
     Assert.AreEqual(3242606, day3a input)
 
 [<Test>]
 let Day3B() =
-    let input =
-        System.IO.File.ReadAllLines "./../../../Day3.txt" |> Array.toList
-
     Assert.AreEqual(4856080, day3b input)
