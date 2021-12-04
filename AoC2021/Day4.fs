@@ -11,29 +11,21 @@ type Bingo = {
 }
 
 let isWinner (board: Board) =
-    let hasHorizontalWinner (b: Board) : bool = 
-        let rowIsFull (row: (int * bool)[]) : bool = 
-            Array.forall (fun (_, b) -> b) row 
-        Array.exists rowIsFull b
-
-    let hasVerticalWinner (b: Board) : bool =
-        let transposed = (Array.transpose b)
-        hasHorizontalWinner transposed
-
+    let hasHorizontalWinner = Array.exists (Array.forall snd)
+    let hasVerticalWinner = Array.transpose >> hasHorizontalWinner
     (hasHorizontalWinner board) || (hasVerticalWinner board)
 
-let scoreBoard (board: Board) = 
-    let unmarked = seq {
-        for i in 0 .. board.Length - 1 do
-            for j in 0 .. board.[i].Length - 1 do
-                let (v, m) = board.[i].[j]
-                if not m then 
-                    yield v
+let visit2D (twoD: 't[][]) = 
+    seq {
+        for i in 0 .. twoD.Length - 1 do
+            for j in 0 .. twoD.[i].Length - 1 do
+                yield twoD.[i].[j]
     }
 
-    Seq.sum unmarked
+let scoreBoard (board: Board) =     
+    visit2D board |> Seq.filter (snd >> not) |> Seq.map fst |> Seq.sum
 
-let markNr nr (board: Board) : unit = 
+let markNr nr (board: Board) : unit =     
     //To mutate, or not to mutate
     for i in 0 .. board.Length - 1 do
         for j in 0 .. board.[i].Length - 1 do
@@ -52,20 +44,11 @@ let parseBoard (input: string list) =
 
 let parseInput (input: string list) =
     let boardsize = 5
-
-    let numbersLine = List.head input
-    let numbers = numbersLine.Split(",") |> Array.map int
-
-    let boardLines = List.skip 2 input |> List.filter (fun s -> s.Length > 0)
-    let splitBoardLines = List.chunkBySize 5 boardLines
-
-    let boards = List.map parseBoard splitBoardLines 
-
+    let lines = List.skip 2 input |> List.filter (fun s -> s.Length > 0)
     {
-        numbers = numbers |> Array.toList;
-        boards = boards
+        numbers = (List.head input).Split(",") |> Array.map int |> Array.toList;
+        boards = lines |> (List.chunkBySize boardsize) |> (List.map parseBoard)
     }
-
 
 let day4a (input: string list) = 
     let bingo = parseInput input
@@ -75,22 +58,18 @@ let day4a (input: string list) =
         | (h :: t) -> 
             List.iter (markNr h) bingo.boards
             match List.tryFind isWinner bingo.boards with
-            | Some b ->
-                let winnerScore = scoreBoard b
-                winnerScore * h 
-            | None ->
-                findWinner t
-        | [] ->
-            0
+            | Some b -> (scoreBoard b) * h 
+            | None -> findWinner t
+        | [] -> failwith "No Bingo!"
 
-    (findWinner bingo.numbers)
+    findWinner bingo.numbers
 
 let day4b (input: string list) =
     let bingo = parseInput input
     
     let rec findWinner numbers (boards: Board list) result = 
         match (numbers, boards) with
-        | (h :: t), (hb::tb) -> 
+        | (h :: t), (_::_) -> 
             List.iter (markNr h) boards
 
             let winners = List.filter isWinner boards
