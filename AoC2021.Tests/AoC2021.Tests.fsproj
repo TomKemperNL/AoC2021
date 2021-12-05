@@ -15,12 +15,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Day5.fs" />
     <Compile Include="Main.fs" />
     <Content Include="Day1A.txt" />
     <Content Include="Day2.txt" />
     <Content Include="Day3.txt" />
     <Content Include="Day4.txt" />
     <Content Include="Day4Practice.txt" />
+    <Content Include="Day5.txt" />
   </ItemGroup>
 
   <ItemGroup>
