@@ -18,6 +18,7 @@ let practiceInputRaw = """0,9 -> 5,9
 
 let practiceInput = practiceInputRaw.Split(Environment.NewLine) |> Array.toList
 
+
 [<Test>]
 let Day5APractice () =
     Assert.AreEqual(5, day5a practiceInput)
@@ -34,5 +35,6 @@ let Day5A () =
     Assert.AreEqual(5169, day5a input)
 
 [<Test>]
-let Day5B() =
-    Assert.AreEqual(12, day5b input)
+let Day5B () =
+    Assert.AreEqual(22083, day5b input)
+

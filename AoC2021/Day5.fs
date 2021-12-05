@@ -30,7 +30,23 @@ let points line =
     | ((x1,y1),(x2,y2)) when x1 = x2 -> 
         seq {(min y1 y2) .. (max y1 y2)} |> Seq.map (fun y -> (x1, y))
     | ((x1,y1),(x2,y2)) when y1 = y2 -> 
-        seq {(min x1 x2) .. (max x1 x2)} |> Seq.map (fun x -> (x, y1))        
+        seq {(min x1 x2) .. (max x1 x2)} |> Seq.map (fun x -> (x, y1))
+    | ((x1,y1),(x2,y2)) when (abs (x2 - x1)) = (abs (y2 - y1))  -> 
+        let length = (max x1 x2) - (min x1 x2)
+        let derivative = (y2 - y1) / (x2 - x1)
+        if x1 > x2 then         
+            seq {
+                for d in 0 .. length do
+                  yield (x1 - d, y1 - (d*derivative))  
+            } 
+        else        
+            seq {
+                for d in 0 .. length do
+                  yield (x1 + d, y1 + (d*derivative))  
+            }
+    | _ ->
+        failwith (sprintf "Not a horizontal or vertical or 45* diagonal line %A" line)
+
 
 let intersects line1 line2 =
     //damnit hier is een truukje voor...
