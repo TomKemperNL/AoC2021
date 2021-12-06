@@ -9,12 +9,12 @@ type Counts = {
     other: int
 }
 
-let toDecimal (bits: int[]) = 
-    let reversed = Array.rev bits
-    let ixrev = Array.indexed reversed
+let toDecimal (bits: int seq) = 
+    let reversed = Seq.rev bits
+    let ixrev = Seq.indexed reversed
     let step (total: int) ((ix: int), (i: int)) = 
         total + (i * (pown 2 ix))
-    Array.fold step 0 ixrev
+    Seq.fold step 0 ixrev
 
 let toIntArray (line: string) = 
     Array.map (fun c -> if c = '1' then 1 else 0) (line.ToCharArray())
@@ -29,11 +29,19 @@ let countCommons (input: string list) =
             match ch with
             | '1' -> { count with ones = count.ones + 1 }
             | '0' -> { count with zeroes = count.zeroes + 1 }
-            | _ -> { count with other = count.zeroes + 1 }
+            | _ -> { count with other = count.other + 1 }
         Array.map2 update state chars                 
     List.fold step start input
 
-let toLists tuples = 
+let rec toLists tuples = 
+    match tuples with 
+    | [] -> ([], [])
+    | [(a,b)] -> ([a], [b])
+    | (a,b) :: t -> 
+        let (remainingAs, remainingBs) = toLists t
+        (a :: remainingAs, b :: remainingBs)
+
+let toLists3 tuples = 
     let add (lista, listb) (a, b) = 
         (a :: lista, b :: listb)    
     let (las, lbs) = Seq.fold add ([], []) tuples
@@ -42,13 +50,13 @@ let toLists tuples =
 let day3a (input: string list) =
     match input with
     | a :: _ ->
-        let gammaEpsilonSplit (counts: Counts[]) : (int[] * int[]) = 
+        let gammaEpsilonSplit (counts: Counts[]) = 
                let split (c: Counts) = 
                    match c with
                    | c when c.ones > c.zeroes -> (1, 0)
                    | c when c.zeroes > c.ones -> (0, 1)
                    | _ -> failwith "Ties are undefined"
-               let items = Array.map split counts
+               let items = Seq.map split counts |> Seq.toList
                toLists items
 
         let result = countCommons input
