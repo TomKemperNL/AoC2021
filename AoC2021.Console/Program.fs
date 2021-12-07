@@ -1,7 +1,7 @@
 // Learn more about F# at http://docs.microsoft.com/dotnet/fsharp
 
 open System
-open AoC2021.Day5
+open AoC2021.Day6
 
 // Define a function to construct a message to print
 let from whom =
@@ -9,8 +9,8 @@ let from whom =
 
 [<EntryPoint>]
 let main argv =
-    printfn "%A" (points ((1,0), (4,3)))
-    printfn "%A" (points ((3,3), (0,0)))
-    printfn "%A" (points ((0,3), (3,0)))
-    printfn "%A" (points ((3,0), (0,3)))
+    day6b 256 [3;4;3;1;2]
+    for i in 21 .. 20 .. 10 do
+        printfn "%d" i
+    
     0 // return an integer exit code
