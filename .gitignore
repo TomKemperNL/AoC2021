@@ -9,3 +9,5 @@ obj
 .config
 #visual studio
 .vs
+#rider
+.idea
