@@ -9,8 +9,6 @@ let from whom =
 
 [<EntryPoint>]
 let main argv =
-    day6b 256 [3;4;3;1;2]
-    for i in 21 .. 20 .. 10 do
-        printfn "%d" i
+    printfn "%f" (1f / 2f)
     
     0 // return an integer exit code

@@ -4,6 +4,7 @@ obj
 # vim on windows?
 *~
 #vscode
+.vscode
 .ionide
 .fake
 .config
@@ -11,3 +12,5 @@ obj
 .vs
 #rider
 .idea
+
+*.user
