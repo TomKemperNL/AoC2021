@@ -15,6 +15,9 @@ let practiceInput =
 let Day7APractice () =
     Assert.AreEqual((2, 37), day7a practiceInput)
 
+[<Test>]
+let Day7BPractice () =
+    Assert.AreEqual((5, 168), day7b practiceInput)
 
 [<Test>]
 let Medians () =
@@ -23,6 +26,13 @@ let Medians () =
     Assert.AreEqual(2, median [ 1; 2; 2; 5 ])
     Assert.AreEqual(2.5, median [ 1; 2; 3; 5 ])
     Assert.AreEqual(2, median [0; 1; 1; 2; 2; 2; 4; 7; 14; 16])
+
+[<Test>]
+let CrabDistance () =
+    Assert.AreEqual(10, crabDistance 1 5)
+    Assert.AreEqual(66, crabDistance 16 5)
+    Assert.AreEqual(15, crabDistance 0 5)
+    Assert.AreEqual(45, crabDistance 14 5)
 
 let input =
     (System.IO.File.ReadAllText "./../../../Day7.txt")
@@ -33,3 +43,8 @@ let input =
 [<Test>]
 let Day7A () =
     Assert.AreEqual((372, 337488), day7a input)
+
+
+[<Test>]
+let Day7B () =
+    Assert.AreEqual((480, 89647695), day7b input)

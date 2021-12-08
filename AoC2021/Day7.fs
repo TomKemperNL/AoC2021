@@ -22,3 +22,15 @@ let day7a (input: int list) =
     let distance a b  = abs(a - b)
     let total target = List.map (distance target) input |> List.sum |> fun n -> (target, n)    
     total (median input |> int)   
+
+
+let crabDistance a b  =
+    let diff = abs(a - b)
+    (diff * (1 + diff)) / 2
+
+let day7b (input: int list) =
+    let total target = List.map (crabDistance target) input |> List.sum |> fun n -> (target, n)
+    let allspots = seq { 0..List.max input } |> Seq.toList
+    List.map total allspots |> List.minBy snd
+    
+    
