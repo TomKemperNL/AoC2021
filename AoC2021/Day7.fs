@@ -15,11 +15,10 @@ let median (input: int list) =
 
 let day7a (input: int list) =
     let middle = median input 
-    let distance a b  = abs(a - b)
+    let distance a b  = abs(a - b)    
     
-    List.map (distance 1) input |> List.sum |> (printfn "distance to 1 %d")
-    List.map (distance 3) input |> List.sum |> (printfn "distance to 3 %d")
-    List.map (distance 10) input |> List.sum |> (printfn "distance to 10 %d")
+    let total target = List.map (distance target) input |> List.sum |> fun n -> (target, n)
     
-    let total = List.map (distance middle) input |> List.sum
-    (middle, total)
+    List.map total input |> List.minBy snd
+    
+    
