@@ -9,6 +9,6 @@ let from whom =
 
 [<EntryPoint>]
 let main argv =
-    printfn "%f" (1f / 2f)
+    printfn "%A" ("16,1,2,0,4,2,7,1,2,14".Split(",")|> Array.map int |> Array.sort)
     
     0 // return an integer exit code

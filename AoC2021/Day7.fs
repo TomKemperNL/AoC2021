@@ -1,16 +1,16 @@
 module AoC2021.Day7
 
-let median (input: int list) =
+let median (input: int list) : float =
     let sorted = List.sort input
-    let l = List.length sorted
-    
+    let l = List.length sorted    
     if l % 2 = 0 then 
-        let m1 = ceil(float(l) / float(2)) |> int
-        let m2 = floor(float(l) / float(2)) |> int
-        ((List.item m1 input) + (List.item m2 input)) / 2
+        let m1 = (l / 2) - 1
+        let i1 = List.item m1 sorted
+        let i2 = List.item (m1 + 1) sorted
+        float(i1 + i2) / float(2)
     else
         let m = ceil(float(l) / float(2)) |> int
-        List.item m input
+        float(List.item (m - 1) sorted)
 
 let modal (input: int list) =
     List.countBy id input |> List.maxBy snd |> fst
@@ -20,9 +20,5 @@ let average (input: int list) =
 
 let day7a (input: int list) =    
     let distance a b  = abs(a - b)
-    let total target = List.map (distance target) input |> List.sum |> fun n -> (target, n)
-    
-    List.map total input |> List.minBy snd
-    
-    
-    
+    let total target = List.map (distance target) input |> List.sum |> fun n -> (target, n)    
+    total (median input |> int)   
