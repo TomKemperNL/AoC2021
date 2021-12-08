@@ -11,14 +11,18 @@ let median (input: int list) =
     else
         let m = ceil(float(l) / float(2)) |> int
         List.item m input
-        
 
-let day7a (input: int list) =
-    let middle = median input 
-    let distance a b  = abs(a - b)    
+let modal (input: int list) =
+    List.countBy id input |> List.maxBy snd |> fst
     
+let average (input: int list) =
+    List.sum input / List.length input
+
+let day7a (input: int list) =    
+    let distance a b  = abs(a - b)
     let total target = List.map (distance target) input |> List.sum |> fun n -> (target, n)
     
     List.map total input |> List.minBy snd
+    
     
     
