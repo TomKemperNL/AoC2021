@@ -1,7 +1,7 @@
 // Learn more about F# at http://docs.microsoft.com/dotnet/fsharp
 
 open System
-open AoC2021.Day6
+open AoC2021.Day8
 
 // Define a function to construct a message to print
 let from whom =

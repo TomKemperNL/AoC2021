@@ -18,6 +18,7 @@
     <Compile Include="Day5.fs" />
     <Compile Include="Day6.fs" />
     <Compile Include="Day7.fs" />
+    <Compile Include="Day8.fs" />
     <Compile Include="Main.fs" />
     <Content Include="Day1A.txt" />
     <Content Include="Day2.txt" />
@@ -27,6 +28,7 @@
     <Content Include="Day5.txt" />
     <Content Include="Day6.txt" />
     <Content Include="Day7.txt" />
+    <Content Include="Day8.txt" />
   </ItemGroup>
 
   <ItemGroup>
