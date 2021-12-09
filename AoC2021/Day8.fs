@@ -63,8 +63,9 @@ let parse (line: string) =
         (inputs, outputs)
     | _ -> failwith (sprintf "Unable to parse line %s" line)
 
-let sup =
-    let all = [ A; B; C; D; E; F; G ]
+let all = [ A; B; C; D; E; F; G ]
+
+let sup =    
     Map.ofList (List.map (fun x -> (x, all)) all)
 
 let intersect current options =
@@ -95,9 +96,20 @@ let processClue (wiring: WiringOptions) (word: Alphabet list) =
         |> intersect d [ B; C; D; F ]
         |> intersect f [ B; C; D; F ]
     | [ a; b; c; d; e ] ->
-        wiring //eeeeuuuuh
-    | [ a; b; c; d; e; f ] ->
-        wiring //eeeeuuuuh
+        let missingFrom = [B;C;E;F;]
+        //eeeuh dit kan beter  
+        let filterWiring (w: WiringOptions) (a: Alphabet) =
+            intersectMap w a missingFrom
+        
+        let missingLetters = List.except word all
+        List.fold filterWiring wiring missingLetters       
+    | word when List.length word = 6 ->
+        let missingFrom = [ C;D;E ]        
+        let filterWiring (w: WiringOptions) (a: Alphabet) =
+            intersectMap w a missingFrom
+        
+        let missingLetters = List.except word all
+        List.fold filterWiring wiring missingLetters       
     | [ a; b; c; d; e; f; g ] -> wiring //no info        
     | _ ->
         failwith "lolwut"
