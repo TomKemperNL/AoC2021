@@ -19,6 +19,12 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
 let Practice8A () =
     Assert.AreEqual(26, day8a practiceInput)
 
+[<Test>]
+let Practice8BSingle () =
+    let line  = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
+    
+    Assert.AreEqual(5353, 42)
+
 let input =
     (System.IO.File.ReadAllLines "./../../../Day8.txt") |> Array.toList
     

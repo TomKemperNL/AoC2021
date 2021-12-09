@@ -9,6 +9,10 @@ let from whom =
 
 [<EntryPoint>]
 let main argv =
-    printfn "%A" ("16,1,2,0,4,2,7,1,2,14".Split(",")|> Array.map int |> Array.sort)
+    
+    let line = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
+    let (inp, out) = parse line
+    
+    tryTranslate inp |> printMap
     
     0 // return an integer exit code
