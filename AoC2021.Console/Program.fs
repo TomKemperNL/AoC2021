@@ -14,9 +14,10 @@ let main argv =
     let (inp, out) = parse line
     
     match tryTranslate inp with
-    | Some map -> printMap map
-        
-    | None -> printfn "Noooope"
+    | Some map ->
+        printMap map |> ignore
+        List.map (wiringToNumber map) out |> concatNrs |> printfn "%d"
+    | None -> printfn "Noooope" 
     
     
     0 // return an integer exit code

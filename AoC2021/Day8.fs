@@ -162,6 +162,14 @@ let tryTranslate (words: Alphabet list list) =
         Some (Map.map (fun k v -> (Set.toList >> List.item 0) v) result)
     else
         None
+        
+let wiringToNumber (translation: Map<Alphabet,Alphabet>) (wires: Alphabet list) : int =
+    let activeWires = List.map (fun n -> Map.find n translation) wires |> Set.ofList
+    Map.find activeWires toInt
+
+let concatNrs (nrs: int list) : int=
+    let conc = String.concat ""
+    List.map string nrs |> conc |> int
 
 let translate (word: Alphabet list) : int option =
     match List.length word with
@@ -183,4 +191,14 @@ let day8a (input: string list) =
     List.map (countnrs [ 1; 4; 7; 8 ]) outputs
     |> List.sum
 
-let day8b input = 42
+let day8bSingle line = 
+    let (inp, out) = parse line
+
+    match tryTranslate inp with
+    | Some map ->
+        printMap map |> ignore
+        List.map (wiringToNumber map) out |> concatNrs
+    | None -> failwith (sprintf "Cannot translate %s" line)
+
+let day8b (input: string list) =
+    List.map day8bSingle input |> List.sum

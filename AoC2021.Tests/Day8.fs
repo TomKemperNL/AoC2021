@@ -23,7 +23,7 @@ let Practice8A () =
 let Practice8BSingle () =
     let line  = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
     
-    Assert.AreEqual(5353, 42)
+    Assert.AreEqual(5353, day8bSingle line)
 
 let input =
     (System.IO.File.ReadAllLines "./../../../Day8.txt") |> Array.toList
@@ -31,3 +31,8 @@ let input =
 [<Test>]
 let Day8A () =
     Assert.AreEqual(548, day8a input)
+    
+ 
+[<Test>]
+let Day8B () =
+    Assert.AreEqual(1074888, day8b input)
