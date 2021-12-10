@@ -33,5 +33,4 @@ let Day10BPractice () =
 
 [<Test>]
 let Day10B () =    
-    //too low 202784119
-    Assert.AreNotEqual(202784119, day10b input)
+    Assert.AreEqual(3260812321L, day10b input)

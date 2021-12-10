@@ -59,23 +59,23 @@ let day10a (input: string list) =
     let errorToInt (error: SyntaxError) = Map.find error.expected pointMap
     List.map errorToInt errors |> List.sum
 
-let day10b (input: string list) =
+let day10b (input: string list) : int64 =
     let grabIncompletes res =
         match res with
         | Incomplete bracks -> Some bracks
         | _ -> None
 
     let pointsB =
-        [ (')', 1)
-          (']', 2)
-          ('}', 3)
-          ('>', 4) ]
+        [ (')', 1L)
+          (']', 2L)
+          ('}', 3L)
+          ('>', 4L) ]
         |> Map.ofList
 
-    let scoreIncomplete (score: int) (bracket: char) =
-        (score * 5) + (Map.find bracket pointsB)
+    let scoreIncomplete (score: int64) (bracket: char) =
+        (score * 5L) + (Map.find bracket pointsB)
 
-    let lineScores = List.map parseLine input |> List.choose grabIncompletes |> List.map (List.fold scoreIncomplete 0) |> List.sort
+    let lineScores = List.map parseLine input |> List.choose grabIncompletes |> List.map (List.fold scoreIncomplete 0L) |> List.sort
     
     let middleIndex = (List.length lineScores / 2)
     List.item middleIndex lineScores
