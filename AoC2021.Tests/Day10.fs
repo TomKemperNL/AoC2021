@@ -26,3 +26,12 @@ let input =
 [<Test>]
 let Day10A () =
     Assert.AreEqual(240123, day10a input)
+    
+[<Test>]
+let Day10BPractice () =
+    Assert.AreEqual(288957, day10b practiceInput)
+
+[<Test>]
+let Day10B () =    
+    //too low 202784119
+    Assert.AreNotEqual(202784119, day10b input)
