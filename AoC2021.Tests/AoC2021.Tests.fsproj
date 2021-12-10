@@ -20,6 +20,7 @@
     <Compile Include="Day7.fs" />
     <Compile Include="Day8.fs" />
     <Compile Include="Day9.fs" />
+    <Compile Include="Day10.fs" />
     <Compile Include="Main.fs" />
     <Content Include="Day1A.txt" />
     <Content Include="Day2.txt" />

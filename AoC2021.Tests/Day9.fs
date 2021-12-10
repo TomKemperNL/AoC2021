@@ -40,5 +40,5 @@ let Day9BPractice () =
     
 [<Test>]
 let Day9B () =
-    let result = day9b input
+    let result = day9b input    
     Assert.AreEqual(856716, result)
