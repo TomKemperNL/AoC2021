@@ -1,10 +1,15 @@
 ﻿module AoC2021.Day10
 
-let pointMap =
-    Map.ofList [ (')', 3)
-                 (']', 57)
-                 ('}', 1197)
-                 ('>', 25137) ]
+let brackets = [
+    ('(', ')')
+    ('[', ']')
+    ('{', '}')
+    ('<', '>')
+]
+
+let openingBrackets = List.map fst brackets
+let closingBrackets = List.map snd brackets
+let bracketMap = Map.ofList brackets
 
 type SyntaxError = { expected: char; actual: char option }
 
@@ -18,36 +23,26 @@ let parseLine (line: string) =
 
     let rec parseLineRec (chars: char list) (brackets: char list) =
         match chars with
-        | '(' :: rest -> parseLineRec rest (')' :: brackets)
-        | '[' :: rest -> parseLineRec rest (']' :: brackets)
-        | '{' :: rest -> parseLineRec rest ('}' :: brackets)
-        | '<' :: rest -> parseLineRec rest ('>' :: brackets)
-        | ')' :: rest ->
+        | left :: rest when List.contains left openingBrackets ->
+            let matchingBracket = Map.find left bracketMap
+            parseLineRec rest (matchingBracket :: brackets)        
+        | right :: rest when List.contains right closingBrackets ->
             match brackets with
-            | ')' :: t -> parseLineRec rest t
-            | err :: t -> Error { expected = ')'; actual = Some err }
-            | [] -> Error { expected = ')'; actual = None }
-        | ']' :: rest ->
-            match brackets with
-            | ']' :: t -> parseLineRec rest t
-            | err :: t -> Error { expected = ']'; actual = Some err }
-            | [] -> Error { expected = ']'; actual = None }
-        | '}' :: rest ->
-            match brackets with
-            | '}' :: t -> parseLineRec rest t
-            | err :: t -> Error { expected = '}'; actual = Some err }
-            | [] -> Error { expected = '}'; actual = None }
-        | '>' :: rest ->
-            match brackets with
-            | '>' :: t -> parseLineRec rest t
-            | err :: t -> Error { expected = '>'; actual = Some err }
-            | [] -> Error { expected = '>'; actual = None }
+            | h :: t when h = right -> parseLineRec rest t
+            | err :: _ -> Error { expected = right; actual = Some err }
+            | [] -> Error { expected = ')'; actual = None }        
         | [] -> Incomplete brackets
         | _ -> Failure(sprintf "No idea what to do with %s" line)
 
     parseLineRec chars []
 
-let day10a (input: string list) =
+let day10a (input: string list) =    
+    let pointMap =
+        Map.ofList [ (')', 3)
+                     (']', 57)
+                     ('}', 1197)
+                     ('>', 25137) ]
+    
     let grabErrors res =
         match res with
         | Error err -> Some err
