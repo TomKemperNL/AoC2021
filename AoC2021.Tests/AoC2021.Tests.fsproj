@@ -32,6 +32,7 @@
     <Content Include="Day7.txt" />
     <Content Include="Day8.txt" />
     <Content Include="Day9.txt" />
+    <Content Include="Day10.txt" />
   </ItemGroup>
 
   <ItemGroup>
