@@ -13,6 +13,10 @@ let main argv =
     let line = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
     let (inp, out) = parse line
     
-    tryTranslate inp |> printMap
+    match tryTranslate inp with
+    | Some map -> printMap map
+        
+    | None -> printfn "Noooope"
+    
     
     0 // return an integer exit code

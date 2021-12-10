@@ -10,19 +10,19 @@ type Alphabet =
     | G
 
 type Wiring = Map<Alphabet, Alphabet>
-type WiringOptions = Map<Alphabet, Alphabet list>
+type WiringOptions = Map<Alphabet, Set<Alphabet>>
 
 let fromInt =
-    Map.ofList [ (1, [ C; F ])
-                 (7, [ A; C; F ])
-                 (4, [ B; C; D; F ])
-                 (2, [ A; C; D; E; G ])
-                 (3, [ A; C; D; F; G ])
-                 (5, [ A; B; D; F; G ])
-                 (0, [ A; B; C; E; F; G ])
-                 (6, [ A; B; D; E; F; G ])
-                 (9, [ A; B; C; D; F; G ])
-                 (8, [ A; B; C; D; E; F; G ]) ]
+    Map.ofList [ (1, [ C; F ] |> Set.ofList)
+                 (7, [ A; C; F ] |> Set.ofList)
+                 (4, [ B; C; D; F ] |> Set.ofList)
+                 (2, [ A; C; D; E; G ] |> Set.ofList)
+                 (3, [ A; C; D; F; G ] |> Set.ofList)
+                 (5, [ A; B; D; F; G ] |> Set.ofList)
+                 (0, [ A; B; C; E; F; G ] |> Set.ofList)
+                 (6, [ A; B; D; E; F; G ] |> Set.ofList)
+                 (9, [ A; B; C; D; F; G ] |> Set.ofList)
+                 (8, [ A; B; C; D; E; F; G ] |> Set.ofList) ]
 
 let toInt =
     Map.toSeq fromInt
@@ -63,60 +63,84 @@ let parse (line: string) =
         (inputs, outputs)
     | _ -> failwith (sprintf "Unable to parse line %s" line)
 
-let all = [ A; B; C; D; E; F; G ]
+let all = [ A; B; C; D; E; F; G ] |> Set.ofList
 
 let sup =    
-    Map.ofList (List.map (fun x -> (x, all)) all)
-
-let intersect current options =
-    List.filter (fun c -> List.contains c options) current
+    Map.ofSeq (Set.map (fun x -> (x, all)) all)
 
 let intersectMap map key options =
     let existing = Map.find key map
-    let replacement = intersect existing options
+    let replacement = Set.intersect existing options
+    Map.add key replacement map
+    
+let diffMap map key toRemove =
+    let existing = Map.find key map
+    let replacement = Set.difference existing toRemove
     Map.add key replacement map
 
 let processClue (wiring: WiringOptions) (word: Alphabet list) =
     let intersect key options map = intersectMap map key options
 
     match word with
-    | [ c; f ] ->
+    | [ c; f ]  ->
+        let matches = [ C; F ] |> Set.ofList
+        
         wiring
-        |> intersect c [ C; F ]
-        |> intersect f [ C; F ]
+        |> intersect c matches
+        |> intersect f matches
     | [ a; c; f ] ->
+        let matches = [ A; C; F ] |> Set.ofList
+        
         wiring
-        |> intersect a [ A; C; F ]
-        |> intersect c [ A; C; F ]
-        |> intersect f [ A; C; F ]
+        |> intersect a matches
+        |> intersect c matches
+        |> intersect f matches
     | [ b; c; d; f ] ->
+        let matches = [ B; C; D; F ] |> Set.ofList
+        
         wiring
-        |> intersect b [ B; C; D; F ]
-        |> intersect c [ B; C; D; F ]
-        |> intersect d [ B; C; D; F ]
-        |> intersect f [ B; C; D; F ]
-    | [ a; b; c; d; e ] ->
-        let missingFrom = [B;C;E;F;]
-        //eeeuh dit kan beter  
+        |> intersect b matches
+        |> intersect c matches
+        |> intersect d matches
+        |> intersect f matches
+    | w when List.length w = 5 ->
+        let missingFrom = [B;C;E;F;] |> Set.ofList
+        //eeeuh dit kan beter hier gooi ik informatie weg. Nouja, misschien hebben we mazzel
         let filterWiring (w: WiringOptions) (a: Alphabet) =
             intersectMap w a missingFrom
         
-        let missingLetters = List.except word all
-        List.fold filterWiring wiring missingLetters       
-    | word when List.length word = 6 ->
-        let missingFrom = [ C;D;E ]        
+        let missingLetters = Set.difference all (Set.ofList word)
+        Set.fold filterWiring wiring missingLetters       
+    | w when List.length word = 6 ->
+        let missingFrom = [ C;D;E ] |> Set.ofList        
         let filterWiring (w: WiringOptions) (a: Alphabet) =
             intersectMap w a missingFrom
         
-        let missingLetters = List.except word all
-        List.fold filterWiring wiring missingLetters       
+        let missingLetters = Set.difference all (Set.ofList word)
+        Set.fold filterWiring wiring missingLetters       
     | [ a; b; c; d; e; f; g ] -> wiring //no info        
     | _ ->
         failwith "lolwut"
 
-let printMap (translation: WiringOptions) =
+let resolveCandidates (wiring: WiringOptions) =
+    let tupled = Map.toList wiring
+    
+    let updateWiring (w: WiringOptions) (key, value) : WiringOptions =
+        let allKeys = Map.keys w |> Seq.toList
+        let occurences = List.filter (snd >> (=) value) tupled
+        let keys = List.map fst occurences
+        if List.length occurences = Set.count value then
+            List.fold (fun state k -> diffMap state k value) w (List.except keys allKeys)       
+        else
+            w
+    
+    List.fold updateWiring wiring tupled
+    
+        
+    
+let printMap translation =
     for (k, v) in Map.toList translation do
-        printfn "%O: %A" k v
+        printfn $"{k}: {v}"
 
 let rec fixedPoint fn items =
     let once = fn items
@@ -126,11 +150,18 @@ let rec fixedPoint fn items =
     else
         fixedPoint fn once
 
+
+
 let tryTranslate (words: Alphabet list list) =
     let startState = sup
     let run translationInProgress =
-        List.fold processClue translationInProgress words
-    fixedPoint run startState
+        let processResult = List.fold processClue translationInProgress words
+        resolveCandidates processResult
+    let result = fixedPoint run startState
+    if Map.values result |> Seq.forall (Set.count >> (=) 1) then
+        Some (Map.map (fun k v -> (Set.toList >> List.item 0) v) result)
+    else
+        None
 
 let translate (word: Alphabet list) : int option =
     match List.length word with
