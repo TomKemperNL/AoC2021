@@ -17,7 +17,17 @@ let practiceInput =
 5283751526""".Split(Environment.NewLine) |> Array.toList 
 
 [<Test>]
-let Day11APractice =
+let TestNeighbours () =
+    let grid = [|
+        [|2;2;2|]
+        [|2;2;2|]
+        [|2;2;2|]
+    |]
+    
+    Assert.AreEqual(8, List.length (neighbours grid (1,1))) 
+
+[<Test>]
+let Day11APractice () =
     Assert.AreEqual(1656, day11a practiceInput)
 
 let input = """5723573158
@@ -30,3 +40,8 @@ let input = """5723573158
 1613367882
 6228614227
 4732225334""".Split(Environment.NewLine) |> Array.toList
+
+
+[<Test>]
+let Day11A () =
+    Assert.AreEqual(1785, day11a input)
