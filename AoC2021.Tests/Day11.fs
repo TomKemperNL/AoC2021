@@ -45,3 +45,13 @@ let input = """5723573158
 [<Test>]
 let Day11A () =
     Assert.AreEqual(1785, day11a input)
+    
+
+[<Test>]
+let Day11BPractice () =
+    Assert.AreEqual(195, day11b practiceInput)
+    
+
+[<Test>]
+let Day11B () =
+    Assert.AreEqual(354, day11b input)

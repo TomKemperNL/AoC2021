@@ -86,3 +86,16 @@ let day11a (input: string list) =
     for i in 1..100 do
         totalFlashes <- totalFlashes + step grid
     totalFlashes
+
+
+let day11b (input: string list) =
+    let grid = parse input
+    let mutable currentStep = 0
+    let mutable flashes = 0
+    
+    let size = (grid.Length * grid.[0].Length)
+    
+    while flashes <> size do
+        currentStep <- currentStep + 1
+        flashes <- step grid
+    currentStep
