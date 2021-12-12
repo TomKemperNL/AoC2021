@@ -85,3 +85,7 @@ CF-vt""".Split(Environment.NewLine) |> Array.toList
 let Day12A () =
     Assert.AreEqual(3802, day12a input)
     
+
+[<Test>]
+let Day12B () =
+    Assert.AreEqual(99448, day12b input)

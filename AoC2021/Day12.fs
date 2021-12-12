@@ -11,32 +11,18 @@ type Caves = Map<Cave, Set<Cave>>
 type Path = Cave list
 
 module Caves =
-    let findPaths (caves: Caves) =
-        let isSmall c =
-            match c with
-            | Small _ -> true
-            | _ -> false
-        
+    let findPaths (caves: Caves) optionsGenerator =
         let rec findPath (found: Path list) (path: Cave list) : Path list =
-            let options : Cave list =
-                match path with
-                | [] -> Map.find Start caves |> Set.toList
-                | p :: _ ->
-                    match Map.tryFind p caves with
-                    | None -> []
-                    | Some opts ->
-                        let visitedSmalls = List.filter isSmall path |> Set.ofList |> Set.add Start
-                        Set.difference opts visitedSmalls |> Set.toList 
+            let options = optionsGenerator path caves
 
             match path, options with
-            | End :: _, _ ->
-                path :: found
-            | _, [] -> found            
+            | End :: _, _ -> path :: found
+            | _, [] -> found
             | _, _ ->
                 let step opt = findPath found (opt :: path)
                 List.collect step options
 
-        findPath [] [Start]
+        findPath [] [ Start ]
 
     let parse (lines: string list) =
         let parseCave (cave: string) =
@@ -56,21 +42,70 @@ module Caves =
             | _ -> failwith (sprintf "no idea what to do with %s" line)
 
         let pairs : ((Cave * Cave) list) = List.map parseLine lines
-        let flippedPairs = List.map (fun (a,b)-> (b,a)) pairs
+        let flippedPairs = List.map (fun (a, b) -> (b, a)) pairs
 
         let addPath (caves: Caves) (c1, c2) : Caves =
             match Map.tryFind c1 caves with
             | None -> Map.add c1 (Set.singleton c2) caves
-            | Some (connected) ->
-                Map.add c1 (Set.add c2 connected) caves
+            | Some (connected) -> Map.add c1 (Set.add c2 connected) caves
 
         List.fold addPath Map.empty (List.append pairs flippedPairs)
 
 
 let day12a (input: string List) =
     let caves = Caves.parse input
-    let paths = Caves.findPaths caves
+
+    let isSmall c =
+        match c with
+        | Small _ -> true
+        | _ -> false
+
+    let optionsGenerator path caves : Cave list =
+        match path with
+        | [] -> Map.find Start caves |> Set.toList
+        | p :: _ ->
+            match Map.tryFind p caves with
+            | None -> []
+            | Some opts ->
+                let visitedSmalls =
+                    List.filter isSmall path
+                    |> Set.ofList
+                    |> Set.add Start
+
+                Set.difference opts visitedSmalls |> Set.toList
+
+    let paths = Caves.findPaths caves optionsGenerator
     List.length paths
 
 let day12b (input: string List) =
-    42
+    let caves = Caves.parse input
+
+    let isSmall c =
+        match c with
+        | Small _ -> true
+        | _ -> false
+
+    let hasVisitedSmallTwice path =
+        List.filter isSmall path
+        |> List.countBy id
+        |> List.exists (fun (k, v) -> v > 1)
+
+    let optionsGenerator path caves : Cave list =
+        match path with
+        | [] -> Map.find Start caves |> Set.toList
+        | p :: _ ->
+            match Map.tryFind p caves with
+            | None -> []
+            | Some opts ->
+                let visitedSmalls =
+                    if hasVisitedSmallTwice path then 
+                        List.filter isSmall path
+                        |> Set.ofList
+                        |> Set.add Start
+                    else
+                        Set.singleton Start
+
+                Set.difference opts visitedSmalls |> Set.toList
+
+    let paths = Caves.findPaths caves optionsGenerator
+    List.length paths
