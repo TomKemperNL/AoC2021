@@ -8,7 +8,7 @@ module Day2 =
     |Down of int
     |Up of int
 
-    let (|ParseCommand|) line = 
+    let (|ParseCommand|_|) line = 
         let m = Regex.Match(line, "(\\w+)\\s(\\d+)")
         if m.Success then
             let direction = m.Groups.[1].Value
@@ -23,8 +23,8 @@ module Day2 =
 
     let parse (line: string)= 
         match line with
-        | ParseCommand (Some result) -> result
-        | ParseCommand None -> failwith <| sprintf "could not parse %s" line        
+        | ParseCommand result -> result
+        | _ -> failwith <| sprintf "could not parse %s" line        
 
     let day2a input =     
         let step (hor, depth) command =
