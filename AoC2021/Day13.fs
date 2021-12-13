@@ -68,8 +68,7 @@ module Folding =
                     let yDistance = y - yf
                     let newY = yf - yDistance
                     (x, newY)
-            let huh = Set.map foldAlongY coords
-            huh
+            Set.map foldAlongY coords            
 
 let draw (points: Set<int*int>) =
     let (maxX, _) = Seq.maxBy fst points
