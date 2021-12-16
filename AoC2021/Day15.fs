@@ -54,25 +54,23 @@ module Cave =
         let rec analyseRec current (unvisited: Set<int * int>) (tentatives: int [] []) =
             let cx, cy = current
             let currentValue = tentatives.[cy].[cx]
-            
+
             if Set.isEmpty unvisited then
                 tentatives
             else
                 let nbs = neighbours current |> Set.ofList
                 let unvisitedNbs = Set.intersect nbs unvisited
 
-                let updateTentative (x,y) =
+                let updateTentative (x, y) =
                     let currentTentative = tentatives.[y].[x]
                     let cost = cave.[y].[x]
                     let newTentative = cost + currentValue
+
                     match currentTentative with
-                    | -1 ->
-                        tentatives.[y].[x] <- newTentative
-                    | oldEstimate when oldEstimate < newTentative ->
-                        tentatives.[y].[x] <- oldEstimate
-                    | _ ->
-                        tentatives.[y].[x] <- newTentative
-                        
+                    | -1 -> tentatives.[y].[x] <- newTentative
+                    | oldEstimate when oldEstimate < newTentative -> tentatives.[y].[x] <- oldEstimate
+                    | _ -> tentatives.[y].[x] <- newTentative
+
                 //Set distances
                 Set.iter updateTentative unvisitedNbs
 
@@ -81,11 +79,15 @@ module Cave =
                 let findTentativeDistance (x, y) = tentatives.[y].[x]
 
                 //zeer placeholder:
-                let nextCandidates = Set.filter (fun (x, y) -> tentatives.[y].[x] <> -1) unvisited
-                    
-                if Set.isEmpty nextCandidates then tentatives
+                let nextCandidates =
+                    Set.filter (fun (x, y) -> tentatives.[y].[x] <> -1) unvisited
+
+                if Set.isEmpty nextCandidates then
+                    tentatives
                 else
-                    let next = Set.minBy findTentativeDistance nextCandidates
+                    let next =
+                        Set.minBy findTentativeDistance nextCandidates
+
                     analyseRec next unvisited tentatives
 
         let unvisited =
@@ -99,6 +101,45 @@ module Cave =
         analyseRec finish unvisited scratchPad
 
 
+    let incrementCave n (cave: Cave) =
+        let height = cave.Length
+        let width = cave.[0].Length
+
+        Array.init
+            height
+            (fun y ->
+                Array.init
+                    width
+                    (fun x ->
+                        let result = (cave.[y].[x] + n)
+
+                        if result <= 9 then
+                            result
+                        else
+                            result % 9 //dit moet eigenlijk met modulo...
+                        ))
+
+
+    let combine (square: 'a [] [] [] []) : 'a [] [] =
+        let verticalBlocks = square.Length
+        let horizontalBlocks = square.[0].Length
+        let blockHeight = square.[0].[0].Length
+        let blockWidth = square.[0].[0].[0].Length
+
+        let initRow y =
+            Array.init
+                (horizontalBlocks * blockWidth)
+                (fun x ->
+                    let blockX, xInBlock = (x / blockWidth), (x % blockWidth)
+                    let blockY, yInBlock = (y / blockHeight), (y % blockHeight)
+
+                    square.[blockY].[blockX].[yInBlock].[xInBlock])
+
+        Array.init (verticalBlocks * blockHeight) initRow
+
+
+
+
 let day15a (input: string list) =
     let cave = Cave.parse input
     let height = cave.Length
@@ -108,3 +149,20 @@ let day15a (input: string list) =
         Cave.analyseCave cave (width - 1, height - 1)
 
     riskCave.[0].[0] - cave.[0].[0]
+
+let day15b (input: string list) =
+    let cave = Cave.parse input
+
+    let initRow y =
+        Array.init 5 (fun x -> Cave.incrementCave (x + y) cave)
+
+    let caveOfCaves = Array.init 5 initRow
+    let flattened = Cave.combine caveOfCaves
+
+    let height = flattened.Length
+    let width = flattened.[0].Length
+
+    let riskCave =
+        Cave.analyseCave flattened (width - 1, height - 1)
+
+    riskCave.[0].[0] - flattened.[0].[0]
