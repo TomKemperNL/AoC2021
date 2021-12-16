@@ -38,7 +38,7 @@ let EdgeCases () =
         "1111"
     ])
     
-    Assert.AreEqual(14, day15a [
+    Assert.AreEqual(13, day15a [
         "19999"
         "11111"
         "99111"
@@ -54,5 +54,5 @@ let input = (System.IO.File.ReadAllLines "./../../../Day15.txt") |> Array.toList
 let Day15A () =
     let result = day15a input
     Assert.Less(result, 459)
-    Assert.AreEqual(40, day15a input)
+    Assert.AreEqual(456, day15a input)
     

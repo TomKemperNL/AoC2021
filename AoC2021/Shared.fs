@@ -7,6 +7,7 @@ module Debug =
         for y in 0 .. arrays.Length do
             for x in 0 .. arrays.[y].Length do
                 itemPrint arrays.[y].[x]
+
             printfn ""
 
 module Functions =
@@ -28,3 +29,26 @@ module Functions =
 
 module Pair =
     let map f (x, y) = (f x, f y)
+
+module Set =
+
+    let minBy fn (items: Set<'a>) : 'a =
+        let start = None, None
+
+        let isSmaller state item =
+            match state with
+            | None, None -> Some item, Some(fn item)
+            | Some k, Some v ->
+                let newV = fn item
+
+                if newV < v then
+                    Some item, Some newV
+                else
+                    Some k, Some v
+            | s -> s
+
+        let result = Set.fold isSmaller start items
+
+        match result with
+        | Some k, Some v -> k
+        | _ -> failwith "Blergh"

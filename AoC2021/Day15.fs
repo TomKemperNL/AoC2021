@@ -42,24 +42,61 @@ module Cave =
     let analyseCave (cave: Cave) (finish: int * int) : Cave =
         let height = cave.Length
         let width = cave.[0].Length
-        
-        let rec findTotalRisk =
-            Functions.memoize
-                (fun (x, y) ->
-                    let risk = cave.[y].[x]
+        let neighbours = neighbours cave Direction.all
 
-                    if (x, y) = finish then
-                        risk
-                    else
-                        let neighbours = neighbours cave [Down; Right;] (x, y)
+        let scratchPad =
+            Array.init height (fun _ -> Array.init width (fun _ -> -1))
+
+        scratchPad.[height - 1].[width - 1] <- cave.[height - 1].[width - 1]
+        let xf, yf = finish
+        scratchPad.[yf].[xf] <- cave.[yf].[xf]
+
+        let rec analyseRec current (unvisited: Set<int * int>) (tentatives: int [] []) =
+            let cx, cy = current
+            let currentValue = tentatives.[cy].[cx]
+            
+            if Set.isEmpty unvisited then
+                tentatives
+            else
+                let nbs = neighbours current |> Set.ofList
+                let unvisitedNbs = Set.intersect nbs unvisited
+
+                let updateTentative (x,y) =
+                    let currentTentative = tentatives.[y].[x]
+                    let cost = cave.[y].[x]
+                    let newTentative = cost + currentValue
+                    match currentTentative with
+                    | -1 ->
+                        tentatives.[y].[x] <- newTentative
+                    | oldEstimate when oldEstimate < newTentative ->
+                        tentatives.[y].[x] <- oldEstimate
+                    | _ ->
+                        tentatives.[y].[x] <- newTentative
                         
-                        let smallestNeighbour =
-                            List.map findTotalRisk neighbours |> List.min
-                        risk + smallestNeighbour)
+                //Set distances
+                Set.iter updateTentative unvisitedNbs
 
-        let initRow y =
-            Array.init width (fun x -> findTotalRisk (x, y))
-        Array.init height initRow
+                let unvisited = Set.remove current unvisited
+
+                let findTentativeDistance (x, y) = tentatives.[y].[x]
+
+                //zeer placeholder:
+                let nextCandidates = Set.filter (fun (x, y) -> tentatives.[y].[x] <> -1) unvisited
+                    
+                if Set.isEmpty nextCandidates then tentatives
+                else
+                    let next = Set.minBy findTentativeDistance nextCandidates
+                    analyseRec next unvisited tentatives
+
+        let unvisited =
+            Set.ofSeq
+            <| seq {
+                for x in 0 .. (width - 1) do
+                    for y in 0 .. (height - 1) do
+                        yield (x, y)
+               }
+
+        analyseRec finish unvisited scratchPad
 
 
 let day15a (input: string list) =
@@ -67,5 +104,7 @@ let day15a (input: string list) =
     let height = cave.Length
     let width = cave.[0].Length
 
-    let riskCave = Cave.analyseCave cave (width - 1, height - 1)
+    let riskCave =
+        Cave.analyseCave cave (width - 1, height - 1)
+
     riskCave.[0].[0] - cave.[0].[0]
