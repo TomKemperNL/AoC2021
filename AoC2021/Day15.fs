@@ -1,7 +1,6 @@
 module AoC2021.Day15
 
 type Cave = int [] []
-type CaveAnalysis = int*int [] []
 type Position = (int * int) * int
 
 type Direction =
@@ -40,32 +39,33 @@ module Cave =
         |> List.filter inBounds
 
 
-    let analyseCave cave finish =
-        ()
-    
-    
-    let findPath start finish cave : Position list =
-        let optionsToFinish = neighbours cave [ Up; Left ]
-        let optionsFromPos = neighbours cave [ Down; Right ]
+    let analyseCave (cave: Cave) (finish: int * int) : Cave =
+        let height = cave.Length
+        let width = cave.[0].Length
+        
+        let rec findTotalRisk =
+            Functions.memoize
+                (fun (x, y) ->
+                    let risk = cave.[y].[x]
 
-        let rec findRec path target (x, y) =
-            if (x, y) = target then
-                path
-            else
-                let path = ((x, y), cave.[y].[x]) :: path
+                    if (x, y) = finish then
+                        risk
+                    else
+                        let neighbours = neighbours cave [Down; Right;] (x, y)
+                        
+                        let smallestNeighbour =
+                            List.map findTotalRisk neighbours |> List.min
+                        risk + smallestNeighbour)
 
-                optionsFromPos (x, y)
-                |> List.map (findRec path target)
-                |> List.minBy totalRisk
+        let initRow y =
+            Array.init width (fun x -> findTotalRisk (x, y))
+        Array.init height initRow
 
-        findRec [] finish start
 
 let day15a (input: string list) =
     let cave = Cave.parse input
-    let width = cave.[0].Length
     let height = cave.Length
+    let width = cave.[0].Length
 
-    let route =
-        Cave.findPath (0, 0) (width - 1, height - 1) cave
-
-    Cave.totalRisk route
+    let riskCave = Cave.analyseCave cave (width - 1, height - 1)
+    riskCave.[0].[0] - cave.[0].[0]

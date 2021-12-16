@@ -29,7 +29,7 @@ let rec slowFishies targetday (fishTodo: int list) (fishDone: int list) day newF
 
 
 
-let rec singleFishie (cache: System.Collections.Generic.Dictionary<int,bigint>) reset newFishie days fishie =
+let singleFishie (cache: System.Collections.Generic.Dictionary<int,bigint>) reset newFishie days fishie =
     let period = reset + 1 // include zero in period
     let effectiveDays = days - fishie - 1 // start at 0
     let rec normalizedFishie days =        

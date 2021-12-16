@@ -48,7 +48,7 @@ let day14a (input: string list) =
     let (template, map) = Polymer.parse input
 
     let (Polymer.Template result) =
-        Loops.repeat 10 (Polymer.step map) template
+        Functions.repeat 10 (Polymer.step map) template
 
     let counts = List.countBy id result
     let max = List.maxBy snd counts |> snd
@@ -60,6 +60,6 @@ let day14b (input: string list) =
     let (template, map) = Polymer.parse input
 
     let (Polymer.Template result) =
-        Loops.repeat 40 (Polymer.step map) template
+        Functions.repeat 40 (Polymer.step map) template
 
     42

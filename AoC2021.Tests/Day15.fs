@@ -19,10 +19,23 @@ let practiceInput =
 [<Test>]
 let Day15APractice () =
     Assert.AreEqual(40, day15a practiceInput)
+    
+
+
+[<Test>]
+let EdgeCases () =     
+    Assert.AreEqual(5, day15a [
+        "1111"
+        "1111"
+        "1111"
+    ])
 
 let input = (System.IO.File.ReadAllLines "./../../../Day15.txt") |> Array.toList
     
 
-//[<Test>]
+[<Test>]
 let Day15A () =
+    let result = day15a input
+    Assert.Less(result, 459)
     Assert.AreEqual(40, day15a input)
+    
