@@ -24,10 +24,27 @@ let Day15APractice () =
 
 [<Test>]
 let EdgeCases () =     
-    Assert.AreEqual(5, day15a [
+    Assert.AreEqual(6, day15a [
         "1111"
         "1111"
         "1111"
+        "1111"
+    ])
+    
+    Assert.AreEqual(6, day15a [
+        "1111"
+        "1111"
+        "1199"
+        "1111"
+    ])
+    
+    Assert.AreEqual(14, day15a [
+        "19999"
+        "11111"
+        "99111"
+        "11191"
+        "19999"
+        "11111"
     ])
 
 let input = (System.IO.File.ReadAllLines "./../../../Day15.txt") |> Array.toList
