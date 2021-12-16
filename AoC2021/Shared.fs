@@ -52,3 +52,12 @@ module Set =
         match result with
         | Some k, Some v -> k
         | _ -> failwith "Blergh"
+
+module Bits =
+    open System.Collections
+    let toDecimal (bits: int seq) = 
+        let reversed = Seq.rev bits
+        let ixrev = Seq.indexed reversed
+        let step (total: int) ((ix: int), (i: int)) = 
+            total + (i * (pown 2 ix))
+        Seq.fold step 0 ixrev
