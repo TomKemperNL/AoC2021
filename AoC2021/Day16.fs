@@ -10,7 +10,7 @@ type LengthTypeId =
     | NrOfPackets
 
 type Length = int
-type Literal = int
+type Literal = int64
 
 type Content =
     | Literal of Literal
@@ -38,7 +38,7 @@ let parseLiteral (bits, consumed) : Literal * int * bool list =
             (List.append result nr, consumed + 5, rest)
 
     let resultingBits, consumed, remaining = parseLiteralRec bits ([], consumed, [])
-    (Bits.toDecimal resultingBits), consumed, remaining
+    (Bits.toLongDecimal resultingBits), consumed, remaining
 
 let rec parseOperator (bits, outerconsumed) : Operator * int * bool list =
     let rec parsePacketsBits (todo: bool list) (bitsRemaining: int) (result: Packet list, consumed, leftOver) =

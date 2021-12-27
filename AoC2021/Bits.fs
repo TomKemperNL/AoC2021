@@ -8,9 +8,25 @@ module Bits =
         let reversed = List.rev bits
         let ixrev = List.indexed reversed
 
-        let step (total: int) ((ix: int), (b: bool)) =
-            let i = if b then 1 else 0
-            total + (i * (pown 2 ix))
+        let step (total) ((ix: int), (b: bool)) =
+            if b then
+                let additional = pown 2l ix
+                total + additional
+            else
+                total
+
+        List.fold step 0 ixrev
+
+    let toLongDecimal (bits: bool list) : int64 =
+        let reversed = List.rev bits
+        let ixrev = List.indexed reversed
+
+        let step (total: int64) ((ix: int), (b: bool)) : int64 =
+            if b then
+                let additional: int64 = pown 2l ix
+                total + additional
+            else
+                total
 
         List.fold step 0 ixrev
 
