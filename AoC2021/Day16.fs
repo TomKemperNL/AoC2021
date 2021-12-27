@@ -1,9 +1,12 @@
 module AoC2021.Day16
 
+open AoC2021.Bits
 open System.Text
 
 type Header = { Version: int; Type: int }
-type LengthTypeId = LengthTypeId of bool
+type LengthTypeId =
+    | TotalBitLength
+    | NrOfPackets
 type Length = int
 type Literal = int
 
@@ -13,42 +16,64 @@ type Content =
 and Packet = Header * Content
 and Operator = LengthTypeId * Length * Packet list
 
-module Bits =
 
-    open System.Collections
-
-    let toDecimal (bits: bool list) =
-        let reversed = List.rev bits
-        let ixrev = List.indexed reversed
-
-        let step (total: int) ((ix: int), (b: bool)) =
-            let i = if b then 1 else 0
-            total + (i * (pown 2 ix))
-
-        List.fold step 0 ixrev
-
-    let toBinaryString (bits: bool list) : string =
-        let sb = StringBuilder()
-
-        for b in bits do
-            (if b then
-                 sb.Append("1")
-             else
-                 sb.Append("0"))
-            |> ignore
-
-        sb.ToString()
+let parseHeader bits =
+    let versionBits, typeBits = List.splitAt 3 bits
+    { Version = Bits.toDecimal versionBits; Type = Bits.toDecimal typeBits }
 
 
-    let private hexToDecimalMap =        
-         Map.ofSeq (Seq.append (seq { '0' .. '9' }) (seq { 'A' .. 'F' }) |> Seq.zip <| { 0 .. 15 })  
+let parseLiteral bits : Literal =    
+    let rec parseLiteralRec (todo: bool list) (result: bool list) : bool list=  
+        match todo with
+        | true :: tail ->
+            let nr, rest = List.splitAt 4 tail
+            parseLiteralRec rest (List.append result nr)
+        | false :: tail ->
+            let nr, _ = List.splitAt 4 tail
+            (List.append result nr)
+        
+    let resultingBits = parseLiteralRec bits []
+    (Bits.toDecimal resultingBits)
+    
+let rec parseOperator bits: Operator =
+    let rec parsePacketsBits (todo: bool list) (bitsRemaining: int) (result: Packet list) : Packet list =
+        match bitsRemaining with
+        | 0 -> result
+        | n -> 
+            let extraPacket, bitsConsumed, leftOver = parsePacketRec todo
+            parsePacketsBits leftOver (n - bitsConsumed) (extraPacket :: result)
+    
+    let rec parsePacketsNr (todo: bool list) (packetsRemaining: int) (result: Packet list) : Packet list =
+        match packetsRemaining with
+        | 0 -> result
+        | n -> 
+            let extraPacket, _, leftOver = parsePacketRec todo
+            parsePacketsNr leftOver (n - 1) (extraPacket :: result)
+    
+    match bits with
+    | true :: tail ->
+        let lengthBits, operatorBits = List.splitAt 15 tail
+        let length = Bits.toDecimal lengthBits        
+        NrOfPackets, length, parsePacketsNr operatorBits length []
+    | false :: tail ->
+        let lengthBits, operatorBits = List.splitAt 15 tail
+        let length = Bits.toDecimal lengthBits
+        TotalBitLength, length, parsePacketsBits operatorBits length []
+        
+and parsePacketRec bits =
+    let headerBits, bodyBits = List.splitAt 6 bits
+    let header = parseHeader headerBits
+    let content = match header.Type with
+                    | 4 ->                        
+                        Literal (parseLiteral bodyBits)
+                    | _ ->
+                        Operator (parseOperator bodyBits)
+    (header, content)
 
-    let fromHexString (hex: string) : bool list =
-
-
-        let mapping =
-            Map.ofList [
-
-                          ]
-
-        []
+let parsePacket bits : Packet =
+   let packet, bitsConsumed, bitsLeftover = parsePacketRec bits
+   packet
+   
+let day16a (input: string) =
+    let bits = Bits.fromHexString input
+    42
