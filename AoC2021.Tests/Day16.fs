@@ -25,7 +25,7 @@ let ParsePacketOp1 () =
     let input = "38006F45291200"
     let sub1 = { Version = 6; Type = 4 }, Literal 10
     let sub2 = { Version = 2; Type = 4 }, Literal 20
-    let expected : Packet = { Version = 1; Type = 6 }, Operator (TotalBitLength, 27, [sub1; sub2])
+    let expected : Packet = { Version = 1; Type = 6 }, Operator (LessThan, (TotalBitLength, 27, [sub1; sub2]))
     Assert.AreEqual(expected, parsePacket (Bits.fromHexString input))
 
 
@@ -36,7 +36,7 @@ let ParsePacketOp2 () =
     let sub1 = { Version = 2; Type = 4 }, Literal 1
     let sub2 = { Version = 4; Type = 4 }, Literal 2
     let sub3 = { Version = 1; Type = 4 }, Literal 3
-    let expected : Packet = { Version = 7; Type = 3 }, Operator (NrOfPackets, 3, [sub1; sub2; sub3])
+    let expected : Packet = { Version = 7; Type = 3 }, Operator (Maximum, (NrOfPackets, 3, [sub1; sub2; sub3]))
     Assert.AreEqual(expected, parsePacket (Bits.fromHexString input))
 
 [<Test>]
@@ -52,3 +52,16 @@ let input = "020D64AEE52E55B4C017938FBBAC2D6002A53D21F9E90C18023600B80021D0862DC
 [<Test>]
 let Day16A () =
     Assert.AreEqual(969, day16a input)
+    
+    
+
+[<Test>]
+let Day16BPractice () =
+    Assert.AreEqual(3, day16b "C200B40A82")
+    Assert.AreEqual(54, day16b "04005AC33890")
+    Assert.AreEqual(7, day16b "880086C3E88112")
+    Assert.AreEqual(9, day16b "CE00C43D881120")
+    Assert.AreEqual(1, day16b "D8005AC2A8F0")
+    Assert.AreEqual(0, day16b "F600BC2D8F")
+    Assert.AreEqual(0, day16b "9C005AC2F8F0")
+    Assert.AreEqual(1, day16b "9C0141080250320F1802104A08")

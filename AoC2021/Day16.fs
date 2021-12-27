@@ -12,9 +12,18 @@ type LengthTypeId =
 type Length = int
 type Literal = int64
 
+type Operation =
+    | Sum
+    | Product
+    | Minimum
+    | Maximum
+    | GreaterThan
+    | LessThan
+    | EqualTo
+
 type Content =
     | Literal of Literal
-    | Operator of Operator
+    | Operator of Operation * Operator
 
 and Packet = Header * Content
 and Operator = LengthTypeId * Length * Packet list
@@ -86,11 +95,20 @@ and parsePacketRec (bits, consumed) =
         | 4 ->
             let result, consumed, remaining = parseLiteral (bodyBits, (consumed + 6))
             Literal result, consumed, remaining
-        | _ ->
+        | opcode ->
+            let op = match opcode with
+                        | 0 -> Sum
+                        | 1 -> Product
+                        | 2 -> Minimum
+                        | 3 -> Maximum
+                        | 5 -> GreaterThan
+                        | 6 -> LessThan
+                        | 7 -> EqualTo
+            
             let result, consumed, remaining =
-                parseOperator (bodyBits, (consumed + 6))
-
-            Operator result, consumed, remaining
+                parseOperator (bodyBits, (consumed + 6))            
+            
+            Operator (op, result), consumed, remaining
 
     (header, content), consumed, remaining
 
@@ -103,9 +121,12 @@ let rec versionSum (packet: Packet) =
 
     match content with
     | Literal _ -> header.Version
-    | Operator (lt, l, packets) -> header.Version + List.sumBy versionSum packets
+    | Operator (op, (lt, l, packets)) -> header.Version + List.sumBy versionSum packets
 
 let day16a (input: string) =
     let bits = Bits.fromHexString input
     let packet = parsePacket bits
     versionSum packet
+
+let day16b (input: string) =
+    42
