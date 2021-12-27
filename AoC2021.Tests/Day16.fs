@@ -10,9 +10,29 @@ let TestToDecimal () =
     Assert.AreEqual("110100101111111000101000", (Bits.fromHexString >> Bits.toBinaryString) input)
 
 [<Test>]
-let ParsePacket () =
+let ParsePacketLiteral () =
     let input = "D2FE28"
     let expected : Packet = { Version = 6; Type = 4 }, Literal 2021
+    Assert.AreEqual(expected, parsePacket (Bits.fromHexString input))
+    
+
+[<Test>]
+let ParsePacketOp1 () =
+    let input = "38006F45291200"
+    let sub1 = { Version = 6; Type = 4 }, Literal 10
+    let sub2 = { Version = 2; Type = 4 }, Literal 20
+    let expected : Packet = { Version = 1; Type = 6 }, Operator (TotalBitLength, 27, [sub1; sub2])
+    Assert.AreEqual(expected, parsePacket (Bits.fromHexString input))
+
+
+
+[<Test>]
+let ParsePacketOp2 () =
+    let input = "EE00D40C823060"
+    let sub1 = { Version = 2; Type = 4 }, Literal 1
+    let sub2 = { Version = 4; Type = 4 }, Literal 2
+    let sub3 = { Version = 1; Type = 4 }, Literal 3
+    let expected : Packet = { Version = 7; Type = 3 }, Operator (NrOfPackets, 3, [sub1; sub2; sub3])
     Assert.AreEqual(expected, parsePacket (Bits.fromHexString input))
 
 [<Test>]

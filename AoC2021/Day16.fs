@@ -22,58 +22,70 @@ let parseHeader bits =
     { Version = Bits.toDecimal versionBits; Type = Bits.toDecimal typeBits }
 
 
-let parseLiteral bits : Literal =    
-    let rec parseLiteralRec (todo: bool list) (result: bool list) : bool list=  
+let parseLiteral bits : Literal*int*bool list=    
+    let rec parseLiteralRec (todo: bool list) (result: bool list, consumed, remaining) =  
         match todo with
         | true :: tail ->
             let nr, rest = List.splitAt 4 tail
-            parseLiteralRec rest (List.append result nr)
+            parseLiteralRec rest (List.append result nr, consumed + 5, rest)
         | false :: tail ->
-            let nr, _ = List.splitAt 4 tail
-            (List.append result nr)
+            let nr, rest = List.splitAt 4 tail
+            (List.append result nr, consumed + 5, rest)
         
-    let resultingBits = parseLiteralRec bits []
-    (Bits.toDecimal resultingBits)
+    let resultingBits, consumed, remaining = parseLiteralRec bits ([], 0, [])
+    (Bits.toDecimal resultingBits), consumed, remaining
     
-let rec parseOperator bits: Operator =
-    let rec parsePacketsBits (todo: bool list) (bitsRemaining: int) (result: Packet list) : Packet list =
+let rec parseOperator bits: Operator*int*bool list =
+    let rec parsePacketsBits (todo: bool list) (bitsRemaining: int) (result: Packet list, consumed, leftOver) =
         match bitsRemaining with
-        | 0 -> result
+        | 0 -> result, consumed, leftOver
         | n -> 
             let extraPacket, bitsConsumed, leftOver = parsePacketRec todo
-            parsePacketsBits leftOver (n - bitsConsumed) (extraPacket :: result)
+            parsePacketsBits leftOver (n - bitsConsumed) (List.append result [extraPacket], bitsConsumed + consumed, leftOver)
     
-    let rec parsePacketsNr (todo: bool list) (packetsRemaining: int) (result: Packet list) : Packet list =
+    let rec parsePacketsNr (todo: bool list) (packetsRemaining: int) (result: Packet list, consumed, leftOver) =
         match packetsRemaining with
-        | 0 -> result
+        | 0 -> result, consumed, leftOver
         | n -> 
-            let extraPacket, _, leftOver = parsePacketRec todo
-            parsePacketsNr leftOver (n - 1) (extraPacket :: result)
+            let extraPacket, bitsConsumed, leftOver = parsePacketRec todo
+            parsePacketsNr leftOver (n - 1) (List.append result [extraPacket], bitsConsumed, leftOver)
     
     match bits with
     | true :: tail ->
-        let lengthBits, operatorBits = List.splitAt 15 tail
-        let length = Bits.toDecimal lengthBits        
-        NrOfPackets, length, parsePacketsNr operatorBits length []
+        let lengthBits, operatorBits = List.splitAt 11 tail
+        let length = Bits.toDecimal lengthBits
+        let packets, consumed, remaining = parsePacketsNr operatorBits length ([], 0, []) 
+        (NrOfPackets, length, packets), consumed, remaining
     | false :: tail ->
         let lengthBits, operatorBits = List.splitAt 15 tail
         let length = Bits.toDecimal lengthBits
-        TotalBitLength, length, parsePacketsBits operatorBits length []
+        let packets, consumed, remaining = parsePacketsBits operatorBits length ([], 0, [])
+        (TotalBitLength, length, packets), consumed, remaining
         
 and parsePacketRec bits =
     let headerBits, bodyBits = List.splitAt 6 bits
     let header = parseHeader headerBits
-    let content = match header.Type with
-                    | 4 ->                        
-                        Literal (parseLiteral bodyBits)
+    let content, consumed, remaining = match header.Type with
+                    | 4 ->
+                        let result, consumed, remaining = parseLiteral bodyBits 
+                        Literal result, consumed, remaining
                     | _ ->
-                        Operator (parseOperator bodyBits)
-    (header, content)
+                        let result, consumed, remaining = parseOperator bodyBits 
+                        Operator result, consumed, remaining
+    (header, content), consumed + 6, remaining
 
 let parsePacket bits : Packet =
    let packet, bitsConsumed, bitsLeftover = parsePacketRec bits
    packet
    
+let rec versionSum (packet: Packet) =
+    let header, content = packet
+    match content with
+    | Literal _ -> header.Version
+    | Operator (lt, l, packets) ->
+        header.Version + List.sumBy versionSum packets
+   
 let day16a (input: string) =
     let bits = Bits.fromHexString input
-    42
+    let packet = parsePacket bits
+    versionSum packet
