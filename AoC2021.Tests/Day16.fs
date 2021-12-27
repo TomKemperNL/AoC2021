@@ -65,3 +65,8 @@ let Day16BPractice () =
     Assert.AreEqual(0, day16b "F600BC2D8F")
     Assert.AreEqual(0, day16b "9C005AC2F8F0")
     Assert.AreEqual(1, day16b "9C0141080250320F1802104A08")
+    
+
+[<Test>]
+let Day16B () =
+    Assert.AreEqual(124921618408L, day16b input)

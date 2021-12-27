@@ -123,10 +123,37 @@ let rec versionSum (packet: Packet) =
     | Literal _ -> header.Version
     | Operator (op, (lt, l, packets)) -> header.Version + List.sumBy versionSum packets
 
+let rec interpret (packet:Packet) =
+    let _, content = packet
+    
+    match content with
+    | Literal v ->
+        v
+    | Operator (Sum, (_, _, packets)) ->
+        let values = List.map interpret packets
+        List.sum values
+    | Operator (Product, (_, _, packets)) ->
+        let values = List.map interpret packets
+        List.fold (*) 1 values
+    | Operator (Minimum, (_, _, packets)) ->
+        let values = List.map interpret packets
+        List.min values
+    | Operator (Maximum, (_, _, packets)) ->
+        let values = List.map interpret packets
+        List.max values
+    | Operator (GreaterThan, (_, _, [p1;p2])) ->
+        if (interpret p1) > (interpret p2) then 1 else 0        
+    | Operator (LessThan, (_, _, [p1;p2])) ->
+        if (interpret p1) < (interpret p2) then 1 else 0
+    | Operator (EqualTo, (_, _, [p1;p2])) ->
+        if (interpret p1) = (interpret p2) then 1 else 0
+
 let day16a (input: string) =
     let bits = Bits.fromHexString input
     let packet = parsePacket bits
     versionSum packet
 
 let day16b (input: string) =
-    42
+    let bits = Bits.fromHexString input
+    let packet = parsePacket bits
+    interpret packet
