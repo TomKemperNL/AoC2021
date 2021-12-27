@@ -13,7 +13,11 @@ let TestToDecimal () =
 let ParsePacketLiteral () =
     let input = "D2FE28"
     let expected : Packet = { Version = 6; Type = 4 }, Literal 2021
-    Assert.AreEqual(expected, parsePacket (Bits.fromHexString input))
+    let result, bitsConsumed, bitsRemaining = parsePacketRec ((Bits.fromHexString input), 0) 
+    Assert.AreEqual(expected, result)
+    Assert.AreEqual(21, bitsConsumed)
+    Assert.AreEqual(3, List.length bitsRemaining)
+    Assert.IsTrue(List.forall ((=) false) bitsRemaining)
     
 
 [<Test>]

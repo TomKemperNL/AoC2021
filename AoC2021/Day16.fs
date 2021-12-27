@@ -40,12 +40,12 @@ let parseLiteral (bits, consumed) : Literal * int * bool list =
     let resultingBits, consumed, remaining = parseLiteralRec bits ([], consumed, [])
     (Bits.toDecimal resultingBits), consumed, remaining
 
-let rec parseOperator (bits, consumed) : Operator * int * bool list =
+let rec parseOperator (bits, outerconsumed) : Operator * int * bool list =
     let rec parsePacketsBits (todo: bool list) (bitsRemaining: int) (result: Packet list, consumed, leftOver) =
         match bitsRemaining with
         | 0 -> result, consumed, leftOver
         | n ->
-            let extraPacket, bitsConsumed, leftOver = parsePacketRec (todo, consumed)
+            let extraPacket, bitsConsumed, leftOver = parsePacketRec (todo, 0)
 
             parsePacketsBits
                 leftOver
@@ -65,17 +65,17 @@ let rec parseOperator (bits, consumed) : Operator * int * bool list =
         let length = Bits.toDecimal lengthBits
 
         let packets, consumed, remaining =
-            parsePacketsNr operatorBits length ([], consumed, [])
+            parsePacketsNr operatorBits length ([], 0, [])
 
-        (NrOfPackets, length, packets), consumed + 12, remaining
+        (NrOfPackets, length, packets), outerconsumed + consumed + 12, remaining
     | false :: tail ->
         let lengthBits, operatorBits = List.splitAt 15 tail
         let length = Bits.toDecimal lengthBits
 
         let packets, consumed, remaining =
-            parsePacketsBits operatorBits length ([], consumed, [])
+            parsePacketsBits operatorBits length ([], 0, [])
 
-        (TotalBitLength, length, packets), consumed + 16, remaining
+        (TotalBitLength, length, packets), outerconsumed + consumed + 16, remaining
 
 and parsePacketRec (bits, consumed) =
     let headerBits, bodyBits = List.splitAt 6 bits
