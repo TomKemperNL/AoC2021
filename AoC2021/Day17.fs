@@ -47,8 +47,17 @@ let shoot ((lx, ly), (hx, hy)) (dx, dy) =
 
 let day17a (input: string) =
     let area = parse input
-    seq { for dx in 0..5000  do
-              for dy in 0..5000 do
+    seq { for dx in 0..300  do
+              for dy in 0..300 do
                   let hitormiss, maxH = shoot area (dx,dy)
                   if hitormiss = Hit then
                       yield (dx, dy), maxH } |> Seq.maxBy snd
+    
+
+let day17b (input: string) =
+    let area = parse input
+    seq { for dx in 0..300  do
+              for dy in -300..300 do
+                  let hitormiss, maxH = shoot area (dx,dy)
+                  if hitormiss = Hit then
+                      yield (dx, dy), maxH } |> Seq.length

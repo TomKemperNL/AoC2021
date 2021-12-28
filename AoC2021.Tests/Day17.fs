@@ -35,3 +35,16 @@ let Day17APractice () =
 let Day17A () =
     let ((dx, dy), maxH) = day17a input
     Assert.AreEqual(9180, maxH)
+    
+
+[<Test>]
+let Day17BPractice () =
+    let combos = day17b exampleInput
+    Assert.AreEqual(112, combos)
+
+
+
+[<Test>]
+let Day17B () =
+    let combos = day17b input
+    Assert.AreEqual(3767, combos)
