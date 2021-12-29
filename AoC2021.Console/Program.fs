@@ -14,17 +14,8 @@ let rawInput = """11111
 
 [<EntryPoint>]
 let main argv =
-    let height = 9
-    let width = 9
-    
-    seq {
-        for y in (height - 1) .. -1 .. 0 do
-            
-        for x in (width - 1) .. -1 .. 0 do
-            yield (x, y)
-    }
-    |> Seq.iter (printf "%O")
-
+    let s : string = string([|'a';'b'|]) 
+    printfn "bla %s" s
 
 
 
