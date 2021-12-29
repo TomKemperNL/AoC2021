@@ -69,20 +69,59 @@ let toString ((left, right): SnailNumber) =
 
 let add (left: SnailNumber) (right: SnailNumber) : SnailNumber = (Pair left, Pair right)
 
-let tryExplode (n: Value) : (bool * Value)=
-    let rec explodeRec nr steps =
+type ExplodeProgress = (int option * int option) option
+
+let rec addLeft (value: int) (n: Value) : bool*Value =
+    match n with
+    | Raw x -> true, Raw (x + value)
+    | Pair (l,r) ->
+        let success, lresult = addLeft value l
+        success, Pair (lresult, r)
+
+
+let rec addRight (value: int) (n: Value) : bool*Value =
+    match n with
+    | Raw x -> true, Raw (x + value)
+    | Pair (l,r) ->
+        let success, rresult = addRight value r
+        success, Pair (l, rresult)
+
+let tryExplode (n: Value) : (ExplodeProgress * Value)=
+    let rec explodeRec nr steps : ExplodeProgress * Value=
         match nr, steps with     
         | Raw n, _ ->
-            false, Raw n
-        | Pair (left, right), 4 -> 
-            true, Raw 0
+            None, Raw n
+        | Pair (left, right), 4 ->
+            match left, right with
+            | Raw n, Raw m -> 
+                Some (Some n, Some m), Raw 0
+            | _ ->
+                failwith "Exploding pairs will always consist of two regular numbers?"
         | Pair (left, right), s -> 
             let tryLeft = explodeRec left (s+1)
             match tryLeft with
-            | true, leftResult -> true, Pair (leftResult, right)
-            | false, leftResult ->
-                let exploded, rightResult = explodeRec right (s + 1)
-                (exploded, Pair (leftResult, rightResult))    
+            | Some targets, leftResult ->
+                match targets with             
+                | leftTarget, Some rightValue ->
+                    let (replaced, rightResult) = addRight rightValue right
+                    if replaced then
+                        Some (leftTarget, None), Pair (leftResult,rightResult)
+                    else
+                        (Some targets), Pair (leftResult, right)
+                | _ ->
+                    (Some targets), Pair (leftResult, right)
+            | None, leftResult ->
+                let targets, rightResult = explodeRec right (s + 1)
+                match targets with
+                | Some (Some leftValue, rightTarget) ->
+                    let (replaced, leftResult) = addLeft leftValue left
+                    if replaced then
+                        Some (None, rightTarget), Pair (leftResult,rightResult)
+                    else
+                        (targets), Pair (leftResult, rightResult)
+                | _ ->
+                    (targets, Pair (leftResult, rightResult))    
+                
     explodeRec n 0
 
 let reduce ((left, right): SnailNumber) : SnailNumber =
