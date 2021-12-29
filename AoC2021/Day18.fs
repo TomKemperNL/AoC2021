@@ -103,7 +103,7 @@ let tryExplode (n: Value) : (ExplodeProgress * Value)=
             | Some targets, leftResult ->
                 match targets with             
                 | leftTarget, Some rightValue ->
-                    let (replaced, rightResult) = addRight rightValue right
+                    let (replaced, rightResult) = addLeft rightValue right
                     if replaced then
                         Some (leftTarget, None), Pair (leftResult,rightResult)
                     else
