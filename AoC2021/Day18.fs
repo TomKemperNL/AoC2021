@@ -4,21 +4,20 @@ open System
 
 type Value =
     | Raw of int
-    | Pair of Value * Value with
-    override this.ToString () =
+    | Pair of Value * Value
+    override this.ToString() =
         match this with
-        | Raw x ->
-            x.ToString()
-        | Pair (left,right) ->
+        | Raw x -> x.ToString()
+        | Pair (left, right) ->
             let rec valueToString (v: Value) : string =
                 match v with
                 | Raw x -> x.ToString()
                 | Pair (left, right) -> sprintf "[%s,%s]" (valueToString left) (valueToString right)
 
             sprintf "[%s,%s]" (valueToString left) (valueToString right)
-        
 
-type SnailNumber = Value * Value 
+
+type SnailNumber = Value * Value
 
 
 
@@ -166,39 +165,49 @@ let trySplit (nr: SnailNumber) : bool * SnailNumber =
     | _ -> failwith "no resulting pair"
 
 let reduce ((left, right): SnailNumber) : SnailNumber =
-    let rec keepReducing n : SnailNumber =         
+    let rec keepReducing n : SnailNumber =
         match tryExplode n with
-        | true, result ->
-            keepReducing result
+        | true, result -> keepReducing result
         | false, result ->
             match trySplit n with
-            | true, result ->
-                keepReducing result
-            | false, result ->
-                result
-    keepReducing (left, right)    
+            | true, result -> keepReducing result
+            | false, result -> result
 
-let add (left: SnailNumber) (right: SnailNumber) : SnailNumber =
-    (Pair left , Pair right) |> reduce
-    
-let addWithoutReduce (left: SnailNumber) (right: SnailNumber) : SnailNumber =
-    (Pair left , Pair right)
+    keepReducing (left, right)
+
+let add (left: SnailNumber) (right: SnailNumber) : SnailNumber = (Pair left, Pair right) |> reduce
+
+let addWithoutReduce (left: SnailNumber) (right: SnailNumber) : SnailNumber = (Pair left, Pair right)
 
 let sum (nrs: SnailNumber list) : SnailNumber =
     match nrs with
     | [] -> failwith "uuuuuh, unspecified"
-    | h :: t ->        
-        List.fold add h t
+    | h :: t -> List.fold add h t
 
 
-let magnitude ((left,right): SnailNumber) =
+let magnitude ((left, right): SnailNumber) =
     let rec magnitudeRec (v: Value) : int =
         match v with
         | Raw n -> n
         | Pair (left, right) ->
-            ((magnitudeRec left) * 3) + ((magnitudeRec right) * 2)
+            ((magnitudeRec left) * 3)
+            + ((magnitudeRec right) * 2)
 
-    ((magnitudeRec left) * 3) + ((magnitudeRec right) * 2)
-    
+    ((magnitudeRec left) * 3)
+    + ((magnitudeRec right) * 2)
+
 let day18a (input: string list) =
-    List.map fromString input |> sum |> reduce |> magnitude
+    List.map fromString input
+    |> sum
+    |> reduce
+    |> magnitude
+
+
+let day18b (input: string list) =
+    let inputs = List.map fromString input
+
+    List.allPairs inputs inputs
+    |> List.filter (fun (x, y) -> x <> y)
+    |> List.map (fun (x, y) -> add x y)
+    |> List.map magnitude
+    |> List.max

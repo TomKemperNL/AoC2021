@@ -216,3 +216,24 @@ let practiceInput =
 [<Test>]
 let Day18APractice () =
     Assert.AreEqual(4140, day18a practiceInput)
+    
+
+let input =
+    (System.IO.File.ReadAllLines "./../../../Day18.txt") |> Array.toList
+    
+
+[<Test>]
+let Day18A () =
+    Assert.AreEqual(3551, day18a input)
+    
+
+[<Test>]
+let Day18BPractice () =
+    Assert.AreEqual(3993, day18b practiceInput)
+    
+
+
+[<Test>]
+let Day18B () =
+    //4589 too high?
+    Assert.AreEqual(4555, day18b input)    
