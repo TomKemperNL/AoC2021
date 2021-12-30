@@ -4,9 +4,21 @@ open System
 
 type Value =
     | Raw of int
-    | Pair of Value * Value
+    | Pair of Value * Value with
+    override this.ToString () =
+        match this with
+        | Raw x ->
+            x.ToString()
+        | Pair (left,right) ->
+            let rec valueToString (v: Value) : string =
+                match v with
+                | Raw x -> x.ToString()
+                | Pair (left, right) -> sprintf "[%s,%s]" (valueToString left) (valueToString right)
 
-type SnailNumber = Value * Value
+            sprintf "[%s,%s]" (valueToString left) (valueToString right)
+        
+
+type SnailNumber = Value * Value 
 
 
 
@@ -67,14 +79,6 @@ let toString ((left, right): SnailNumber) =
     sprintf "[%s,%s]" (valueToString left) (valueToString right)
 
 
-let add (left: SnailNumber) (right: SnailNumber) : SnailNumber = (Pair left, Pair right)
-
-let sum (nrs: SnailNumber list) : SnailNumber =
-    match nrs with
-    | [] -> failwith "uuuuuh, unspecified"
-    | h :: t ->        
-        List.fold add h t
-
 type ExplodeProgress = (int option * int option) option
 
 let rec addLeft (value: int) (n: Value) : bool * Value =
@@ -119,7 +123,7 @@ let tryExplode (n: SnailNumber) : (bool * SnailNumber) =
 
                 match targets with
                 | Some (Some leftValue, rightTarget) ->
-                    let (replaced, leftResult) = addLeft leftValue left
+                    let (replaced, leftResult) = addRight leftValue left
 
                     if replaced then
                         Some(None, rightTarget), Pair(leftResult, rightResult)
@@ -162,30 +166,30 @@ let trySplit (nr: SnailNumber) : bool * SnailNumber =
     | _ -> failwith "no resulting pair"
 
 let reduce ((left, right): SnailNumber) : SnailNumber =
-    let keepGoing fn =
-        let rec keepAtIt anyChanges n =
-            match fn n with
-            | true, result -> keepAtIt true result
-            | false, result -> anyChanges, result
+    let rec keepReducing n : SnailNumber =         
+        match tryExplode n with
+        | true, result ->
+            keepReducing result
+        | false, result ->
+            match trySplit n with
+            | true, result ->
+                keepReducing result
+            | false, result ->
+                result
+    keepReducing (left, right)    
 
-        keepAtIt false
+let add (left: SnailNumber) (right: SnailNumber) : SnailNumber =
+    (Pair left , Pair right) |> reduce
+    
+let addWithoutReduce (left: SnailNumber) (right: SnailNumber) : SnailNumber =
+    (Pair left , Pair right)
 
-    let keepExploding: SnailNumber -> bool * SnailNumber = keepGoing tryExplode
-    let keepSplitting: SnailNumber -> bool * SnailNumber = keepGoing trySplit
+let sum (nrs: SnailNumber list) : SnailNumber =
+    match nrs with
+    | [] -> failwith "uuuuuh, unspecified"
+    | h :: t ->        
+        List.fold add h t
 
-    let singleReduce n : bool * SnailNumber =
-        let applyFunction (state: bool * SnailNumber) (fn: SnailNumber -> bool * SnailNumber) : (bool * SnailNumber) =
-            let hadChanges, nr = state
-            let newChanges, result = fn nr
-            (hadChanges || newChanges), result
-
-        let start: bool * SnailNumber = false, n
-
-        List.fold applyFunction start [ keepExploding; keepSplitting ]
-
-    let keepReducing: SnailNumber -> bool * SnailNumber = keepGoing singleReduce
-    let _, result = keepReducing (left, right)
-    result
 
 let magnitude ((left,right): SnailNumber) =
     let rec magnitudeRec (v: Value) : int =
