@@ -69,64 +69,121 @@ let toString ((left, right): SnailNumber) =
 
 let add (left: SnailNumber) (right: SnailNumber) : SnailNumber = (Pair left, Pair right)
 
+let sum (nrs: SnailNumber list) : SnailNumber =
+    match nrs with
+    | [] -> failwith "uuuuuh, unspecified"
+    | h :: t ->        
+        List.fold add h t
+
 type ExplodeProgress = (int option * int option) option
 
-let rec addLeft (value: int) (n: Value) : bool*Value =
+let rec addLeft (value: int) (n: Value) : bool * Value =
     match n with
-    | Raw x -> true, Raw (x + value)
-    | Pair (l,r) ->
+    | Raw x -> true, Raw(x + value)
+    | Pair (l, r) ->
         let success, lresult = addLeft value l
-        success, Pair (lresult, r)
+        success, Pair(lresult, r)
 
 
-let rec addRight (value: int) (n: Value) : bool*Value =
+let rec addRight (value: int) (n: Value) : bool * Value =
     match n with
-    | Raw x -> true, Raw (x + value)
-    | Pair (l,r) ->
+    | Raw x -> true, Raw(x + value)
+    | Pair (l, r) ->
         let success, rresult = addRight value r
-        success, Pair (l, rresult)
+        success, Pair(l, rresult)
 
-let tryExplode (n: Value) : (ExplodeProgress * Value)=
-    let rec explodeRec nr steps : ExplodeProgress * Value=
-        match nr, steps with     
-        | Raw n, _ ->
-            None, Raw n
+let tryExplode (n: SnailNumber) : (bool * SnailNumber) =
+    let rec explodeRec nr steps : ExplodeProgress * Value =
+        match nr, steps with
+        | Raw n, _ -> None, Raw n
         | Pair (left, right), 4 ->
             match left, right with
-            | Raw n, Raw m -> 
-                Some (Some n, Some m), Raw 0
-            | _ ->
-                failwith "Exploding pairs will always consist of two regular numbers?"
-        | Pair (left, right), s -> 
-            let tryLeft = explodeRec left (s+1)
+            | Raw n, Raw m -> Some(Some n, Some m), Raw 0
+            | _ -> failwith "Exploding pairs will always consist of two regular numbers?"
+        | Pair (left, right), s ->
+            let tryLeft = explodeRec left (s + 1)
+
             match tryLeft with
             | Some targets, leftResult ->
-                match targets with             
+                match targets with
                 | leftTarget, Some rightValue ->
                     let (replaced, rightResult) = addLeft rightValue right
+
                     if replaced then
-                        Some (leftTarget, None), Pair (leftResult,rightResult)
+                        Some(leftTarget, None), Pair(leftResult, rightResult)
                     else
-                        (Some targets), Pair (leftResult, right)
-                | _ ->
-                    (Some targets), Pair (leftResult, right)
+                        (Some targets), Pair(leftResult, right)
+                | _ -> (Some targets), Pair(leftResult, right)
             | None, leftResult ->
                 let targets, rightResult = explodeRec right (s + 1)
+
                 match targets with
                 | Some (Some leftValue, rightTarget) ->
                     let (replaced, leftResult) = addLeft leftValue left
+
                     if replaced then
-                        Some (None, rightTarget), Pair (leftResult,rightResult)
+                        Some(None, rightTarget), Pair(leftResult, rightResult)
                     else
-                        (targets), Pair (leftResult, rightResult)
-                | _ ->
-                    (targets, Pair (leftResult, rightResult))    
-                
-    explodeRec n 0
+                        (targets), Pair(leftResult, rightResult)
+                | _ -> (targets, Pair(leftResult, rightResult))
+
+    let progress, resultingValue = explodeRec (Pair n) 0
+
+    match progress, resultingValue with
+    | None, Pair (left, right) -> false, (left, right)
+    | Some targets, Pair (left, right) -> true, (left, right)
+    | _ -> failwith "no resulting pair"
+
+let trySplit (nr: SnailNumber) : bool * SnailNumber =
+    let rec splitRec (n: Value) : bool * Value =
+        match n with
+        | Raw x when x >= 10 ->
+            let result =
+                x
+                |> float
+                |> (fun x -> x / float (2))
+                |> (fun x -> Math.Floor x, Math.Ceiling x)
+                |> Pair.map int
+                |> Pair.map Raw
+
+            true, Pair result
+        | Raw x -> false, Raw x
+        | Pair (left, right) ->
+            match splitRec left with
+            | true, result -> true, Pair(result, right)
+            | false, leftResult ->
+                let tryRight, rightResult = splitRec right
+                (tryRight, Pair(leftResult, rightResult))
+
+    let changed, result = splitRec (Pair nr)
+
+    match result with
+    | Pair (left, right) -> changed, (left, right)
+    | _ -> failwith "no resulting pair"
 
 let reduce ((left, right): SnailNumber) : SnailNumber =
-    match tryExplode (Pair (left, right)) with
-    | _, v ->
-        match v with
-        | Pair (left, right) -> (left,right)
-        | _ -> failwith "no resulting pair"
+    let keepGoing fn =
+        let rec keepAtIt anyChanges n =
+            match fn n with
+            | true, result -> keepAtIt true result
+            | false, result -> anyChanges, result
+
+        keepAtIt false
+
+    let keepExploding: SnailNumber -> bool * SnailNumber = keepGoing tryExplode
+    let keepSplitting: SnailNumber -> bool * SnailNumber = keepGoing trySplit
+
+    let singleReduce n : bool * SnailNumber =
+        let applyFunction (state: bool * SnailNumber) (fn: SnailNumber -> bool * SnailNumber) : (bool * SnailNumber) =
+            let hadChanges, nr = state
+            let newChanges, result = fn nr
+            (hadChanges || newChanges), result
+
+        let start: bool * SnailNumber = false, n
+
+        List.fold applyFunction start [ keepExploding; keepSplitting ]
+
+    let keepReducing: SnailNumber -> bool * SnailNumber = keepGoing singleReduce
+    let _, result = keepReducing (left, right)
+    result
+
