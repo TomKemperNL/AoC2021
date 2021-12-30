@@ -187,3 +187,14 @@ let reduce ((left, right): SnailNumber) : SnailNumber =
     let _, result = keepReducing (left, right)
     result
 
+let magnitude ((left,right): SnailNumber) =
+    let rec magnitudeRec (v: Value) : int =
+        match v with
+        | Raw n -> n
+        | Pair (left, right) ->
+            ((magnitudeRec left) * 3) + ((magnitudeRec right) * 2)
+
+    ((magnitudeRec left) * 3) + ((magnitudeRec right) * 2)
+    
+let day18a (input: string list) =
+    List.map fromString input |> sum |> reduce |> magnitude
